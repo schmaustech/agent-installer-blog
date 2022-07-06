@@ -1,3 +1,3 @@
 # **OpenShift Agent Installer Deployment**
 
-<img src="penart.jpg" style="width: 1000px;" border=0/>
+<img src="agent-based.png" style="width: 1000px;" border=0/>
