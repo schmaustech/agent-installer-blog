@@ -51,4 +51,52 @@ Create image
 
 Move image to nodes
 
+Once the agent create image command completes we are left with a agent.iso image which is in fact our OpenShift install ISO:
+
+~~~bash
+$ ls -l ./output/
+total 1073152
+-rw-rw-r--. 1 bschmaus bschmaus 1098907648 May 20 08:55 agent.iso
+~~~
+
+Since the nodes I will be using to demonstrate this 3 node compact cluster are virtual machines all on the same KVM hypervisor I will go ahead and copy the agent.iso image over to that host:
+
+~~~bash
+$ scp ./output/agent.iso root@192.168.0.22:/var/lib/libvirt/images/
+root@192.168.0.22's password: 
+agent.iso 
+~~~
+
+With the image moved over to the hypervisor host I went ahead and ensured each virtual machine we are using (asus3-vm[1-3]) has the image set.  Further the hosts are designed boot off the ISO if the disk is empty.  We can confirm everything is ready with the following output:
+
+~~~bash
+# virsh list --all
+ Id   Name        State
+----------------------------
+ -    asus3-vm1   shut off
+ -    asus3-vm2   shut off
+ -    asus3-vm3   shut off
+ -    asus3-vm4   shut off
+ -    asus3-vm5   shut off
+ -    asus3-vm6   shut off
+
+# virsh domblklist asus3-vm1
+ Target   Source
+---------------------------------------------------
+ sda      /var/lib/libvirt/images/asus3-vm1.qcow2
+ sdb      /var/lib/libvirt/images/agent.iso
+
+# virsh domblklist asus3-vm2
+ Target   Source
+---------------------------------------------------
+ sda      /var/lib/libvirt/images/asus3-vm2.qcow2
+ sdb      /var/lib/libvirt/images/agent.iso
+
+# virsh domblklist asus3-vm3
+ Target   Source
+---------------------------------------------------
+ sda      /var/lib/libvirt/images/asus3-vm3.qcow2
+ sdb      /var/lib/libvirt/images/agent.iso
+~~~
+
 Deploy
