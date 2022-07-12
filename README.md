@@ -99,4 +99,10 @@ With the image moved over to the hypervisor host I went ahead and ensured each v
  sdb      /var/lib/libvirt/images/agent.iso
 ~~~
 
+Now lets go ahead and start the first virtual machine:
+
+~~~bash
+# virsh start asus3-vm1
+Domain asus3-vm1 started
+~~~
 Deploy
