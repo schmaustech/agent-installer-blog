@@ -105,4 +105,9 @@ Now lets go ahead and start the first virtual machine:
 # virsh start asus3-vm1
 Domain asus3-vm1 started
 ~~~
+
+Once the first virtual machine is started we can switch over to the console and watch it boot up:
+
+<img src="asus3-vm1-console.png" style="width: 800px;" border=0/>
+
 Deploy
