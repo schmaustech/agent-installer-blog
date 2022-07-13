@@ -8,7 +8,7 @@ As I stated the Agent Installer generates a single ISO image that one would use 
 
 Workflow
 
-<img src="agent-based-2.png" style="width: 1000px;" border=0/>
+<img src="node-lifecycle.png" style="width: 1000px;" border=0/>
 
 How to get binary
 
