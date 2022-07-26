@@ -22,11 +22,13 @@ With OpenShift 4.11 we are introducing a pre-release version of the new agent-ba
 
 ## Getting Familiar with Agent-Based OpenShift Installer
 
-Workflow
+Write something about the workflow describing the image below
 
 <img src="node-lifecycle.png" style="width: 1000px;" border=0/>
 
-How to get binary
+Show how to get the binary here
+
+Now that we have downloaded the binary lets go ahead and create a directory that will contain the required manifests we need for our deployment that will get injected into the ISO we build:
 
 ~~~bash
 $ cd ~/
