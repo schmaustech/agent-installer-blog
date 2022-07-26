@@ -1,10 +1,26 @@
-# **OpenShift Agent Installer Deployment**
+# **Meet The New Agent-Based OpenShift Installer**
 
 <img src="agent-based.png" style="width: 1000px;" border=0/>
 
-There are so many ways to install OpenShift: Assisted Installer, UPI, IPI, Red Hat Advanced Cluster Management and ZTP.  However I have always longed for a single ISO image I could just boot my physical hardware and it would form a OpenShift cluster.  Well that dream is on course to become a reality with the Agent Installer a tool that can generate an ephemeral OpenShift installation image.  In the following blog I will demonstrate how to use this early incarnation of the tool.
+With OpenShift 4.11 we are introducing a pre-release version of the new agent-based installer for OpenShift. Installing clusters on bare metal nodes has never been so easy. Our aim is to provide the flexibility of user-provided infrastructure (UPI) installs with the ease of use of the OpenShift Assisted Installer, while in fully disconnected or air-gapped environments. We have worked with users from different industries and incorporated their feedback and use cases in its design. To do this we are combining existing technologies and experience coming from the Assisted Installer and the installer-provisioned infrastructure (IPI). 
 
-As I stated the Agent Installer generates a single ISO image that one would use to boot all of the nodes they would want to be part of a newly deployed cluster.  However this current example may change some as the code gets developed and merged into the mainstream Openshift installer.  However if one is interested in exploring this new method the following can be a preview of what is to come.
+## Some of the use cases we are addressing
+
+* Quickly deploy isolated OpenShift clusters on premise of any topology
+* Install a cluster zero with OpenShift management components such as Red Hat Advanced Cluster Management for Kubernetes (ACM), GitOps, Quay, and components to support your other clusters.
+* As we start with Hypershift, install the OpenShift cluster that will house the control planes for all the other clusters.
+
+## Some of the features we are including and working on
+
+* Create bootable images with openshift-install to deploy your clusters
+* In-place bootstrap, no extra node required
+* Works in fully disconnected deployments
+* Works with a mirrored local registry
+* Supports single node OpenShift (SNO), compact 3-node clusters, and highly available topologies
+* Can be automated with third party tools
+* User-friendly interface based on the Assisted Installer
+
+## Getting Familiar with Agent-bBased OpenShift Installer
 
 Workflow
 
