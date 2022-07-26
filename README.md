@@ -12,6 +12,11 @@ Workflow
 
 How to get binary
 
+~~~bash
+$ cd ~/
+$ mkdir ~/manifests
+
+
 With the directory created we can move onto creating the agent cluster install resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the api and ingress vip and the cluster networking.   In my example I will be deploying a 3 node compact cluster which referenced a cluster deployment named kni22:
 
 ~~~bash
@@ -38,6 +43,70 @@ spec:
     controlPlaneAgents: 3
     workerAgents: 0 
   sshPublicKey: 'INSERT PUBLIC SSH KEY HERE'
+EOF
+~~~
+
+Next we will create the cluster deployment resource file which defines the cluster name, domain, and other details:
+
+~~~bash
+$ cat << EOF > ./manifests/cluster-deployment.yaml
+apiVersion: hive.openshift.io/v1
+kind: ClusterDeployment
+metadata:
+  name: kni22
+  namespace: kni22
+spec:
+  baseDomain: schmaustech.com
+  clusterInstallRef:
+    group: extensions.hive.openshift.io
+    kind: AgentClusterInstall
+    name: kni22-agent-cluster-install
+    version: v1beta1
+  clusterName: kni22
+  controlPlaneConfig:
+    servingCertificates: {}
+  platform:
+    agentBareMetal:
+      agentSelector:
+        matchLabels:
+          bla: aaa
+  pullSecretRef:
+    name: pull-secret
+EOF
+~~~
+
+Moving on we now create the cluster image set resource file which contains OpenShift image information such as the repository and image name.  This will be the version of the cluster that gets deployed in our 3 node compact cluster.  In this example we are using 4.10.23:
+
+~~~bash
+$ cat << EOF > ./manifests/cluster-image-set.yaml
+apiVersion: hive.openshift.io/v1
+kind: ClusterImageSet
+metadata:
+  name: ocp-release-4.10.23-x86-64-for-4.10.0-0-to-4.11.0-0
+spec:
+  releaseImage: quay.io/openshift-release-dev/ocp-release:4.10.23-x86_64
+EOF
+~~~
+
+Next we define the infrastructure environment file which  contains information for pulling OpenShift onto the target host nodes we are deploying to:
+
+~~~bash
+$ cat << EOF > ./manifests/infraenv.yaml 
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: kni22
+  namespace: kni22
+spec:
+  clusterRef:
+    name: kni22  
+    namespace: kni22
+  pullSecretRef:
+    name: pull-secret
+  sshAuthorizedKey: 'INSERT PUBLIC SSH KEY HERE'
+  nmStateConfigLabelSelector:
+    matchLabels:
+      kni22-nmstate-label-name: kni22-nmstate-label-value
 EOF
 ~~~
 
