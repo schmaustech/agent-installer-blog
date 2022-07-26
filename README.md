@@ -4,13 +4,13 @@
 
 With OpenShift 4.11 we are introducing a pre-release version of the new agent-based installer for OpenShift. Installing clusters on bare metal nodes has never been so easy. Our aim is to provide the flexibility of user-provided infrastructure (UPI) installs with the ease of use of the OpenShift Assisted Installer, while in fully disconnected or air-gapped environments. We have worked with users from different industries and incorporated their feedback and use cases in its design. To do this we are combining existing technologies and experience coming from the Assisted Installer and the installer-provisioned infrastructure (IPI). 
 
-## Some of the use cases we are addressing
+## Use Cases We are Addressing
 
 * Quickly deploy isolated OpenShift clusters on premise of any topology
 * Install a cluster zero with OpenShift management components such as Red Hat Advanced Cluster Management for Kubernetes (ACM), GitOps, Quay, and components to support your other clusters.
 * As we start with Hypershift, install the OpenShift cluster that will house the control planes for all the other clusters.
 
-## Some of the features we are including and working on
+## Features Included and/or In Progress
 
 * Create bootable images with openshift-install to deploy your clusters
 * In-place bootstrap, no extra node required
@@ -20,7 +20,7 @@ With OpenShift 4.11 we are introducing a pre-release version of the new agent-ba
 * Can be automated with third party tools
 * User-friendly interface based on the Assisted Installer
 
-## Getting Familiar with Agent-bBased OpenShift Installer
+## Getting Familiar with Agent-Based OpenShift Installer
 
 Workflow
 
