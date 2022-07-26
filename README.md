@@ -31,7 +31,7 @@ How to get binary
 ~~~bash
 $ cd ~/
 $ mkdir ~/manifests
-
+~~~
 
 With the directory created we can move onto creating the agent cluster install resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the api and ingress vip and the cluster networking.   In my example I will be deploying a 3 node compact cluster which referenced a cluster deployment named kni22:
 
@@ -124,6 +124,142 @@ spec:
     matchLabels:
       kni22-nmstate-label-name: kni22-nmstate-label-value
 EOF
+~~~
+
+The next file is the nmstate configuration file and this file provides all the details for all of the host that will be booted using the ISO image we are going to create.   Since we have a 3 node compact cluster to deploy we notice that in the file below we have specified three nmstate configurations.  Each configuration is for a node and generates a static IP address on the nodes enp2s0 interface that matches the MAC address defined.   This enables the ISO to boot up and not necessarily require DHCP in the environment which is what a lot of customers are looking for.   Again my example has 3 configurations but if we had worker nodes we would add those in too.   Lets go ahead and create the file:
+
+~~~bash
+$ cat << EOF > ./manifests/nmstateconfig.yaml
+---
+apiVersion: agent-install.openshift.io/v1beta1
+kind: NMStateConfig
+metadata:
+  name: mynmstateconfig01
+  namespace: openshift-machine-api
+  labels:
+    kni22-nmstate-label-name: kni22-nmstate-label-value
+spec:
+  config:
+    interfaces:
+      - name: enp2s0
+        type: ethernet
+        state: up
+        mac-address: 52:54:00:e7:05:72
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.0.116
+              prefix-length: 24
+          dhcp: false
+    dns-resolver:
+      config:
+        server:
+          - 192.168.0.10
+    routes:
+      config:
+        - destination: 0.0.0.0/0
+          next-hop-address: 192.168.0.1
+          next-hop-interface: enp2s0
+          table-id: 254
+  interfaces:
+    - name: "enp2s0"
+      macAddress: 52:54:00:e7:05:72
+---
+apiVersion: agent-install.openshift.io/v1beta1
+kind: NMStateConfig
+metadata:
+  name: mynmstateconfig02
+  namespace: openshift-machine-api
+  labels:
+    kni22-nmstate-label-name: kni22-nmstate-label-value
+spec:
+  config:
+    interfaces:
+      - name: enp2s0
+        type: ethernet
+        state: up
+        mac-address: 52:54:00:95:fd:f3
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.0.117
+              prefix-length: 24
+          dhcp: false
+    dns-resolver:
+      config:
+        server:
+          - 192.168.0.10
+    routes:
+      config:
+        - destination: 0.0.0.0/0
+          next-hop-address: 192.168.0.1
+          next-hop-interface: enp2s0
+          table-id: 254
+  interfaces:
+    - name: "enp2s0"
+      macAddress: 52:54:00:95:fd:f3
+---
+apiVersion: agent-install.openshift.io/v1beta1
+kind: NMStateConfig
+metadata:
+  name: mynmstateconfig03
+  namespace: openshift-machine-api
+  labels:
+    kni22-nmstate-label-name: kni22-nmstate-label-value
+spec:
+  config:
+    interfaces:
+      - name: enp2s0
+        type: ethernet
+        state: up
+        mac-address: 52:54:00:e8:b9:18
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.0.118
+              prefix-length: 24
+          dhcp: false
+    dns-resolver:
+      config:
+        server:
+          - 192.168.0.10
+    routes:
+      config:
+        - destination: 0.0.0.0/0
+          next-hop-address: 192.168.0.1
+          next-hop-interface: enp2s0
+          table-id: 254
+  interfaces:
+    - name: "enp2s0"
+      macAddress: 52:54:00:e8:b9:18
+EOF
+~~~
+
+The final file we need to create is the pull-secret resource file which contains the pull-secret values so that our cluster can pull in the required OpenShift images to instantiate the cluster:
+
+~~~bash
+$ cat << EOF > ./manifests/pull-secret.yaml 
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: pull-secret
+  namespace: kni22
+stringData:
+  .dockerconfigjson: 'INSERT JSON FORMATTED PULL-SECRET'
+EOF
+~~~
+
+At this point we should now have our six required files defined to build our Agent Installer ISO:
+
+~~~bash
+$ ls -1 ./manifests/
+agent-cluster-install.yaml
+cluster-deployment.yaml
+cluster-image-set.yaml
+infraenv.yaml
+nmstateconfig.yaml
+pull-secret.yaml 
 ~~~
 
 Generate install-config.yaml
