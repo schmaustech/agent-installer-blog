@@ -370,9 +370,23 @@ Generate install-config.yaml
 Install-config.yaml
 ~~~
 
-Create image
+We are now ready to use the Openshift install binary we compiled earlier with the Agent Installer code to generate our ephemeral OpenShift ISO.   We do this by issuing the following command which introduces the agent option.  This in turn will read in the manifest details we generated and download the corresponding RHCOS image and then inject our details into the image writing out a file called agent.iso:
 
-Move image to nodes
+~~~bash
+$ bin/openshift-install agent create image 
+INFO adding MAC interface map to host static network config - Name:  enp2s0  MacAddress: 52:54:00:e7:05:72 
+INFO adding MAC interface map to host static network config - Name:  enp2s0  MacAddress: 52:54:00:95:fd:f3 
+INFO adding MAC interface map to host static network config - Name:  enp2s0  MacAddress: 52:54:00:e8:b9:18 
+INFO[0000] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
+INFO[0000] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
+INFO[0001] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
+INFO[0001] Start configuring static network for 3 hosts  pkg=manifests
+INFO[0001] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
+INFO[0001] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
+INFO[0001] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
+INFO Obtaining RHCOS image file from 'https://rhcos-redirector.apps.art.xq1c.p1.openshiftapps.com/art/storage/releases/rhcos-4.11/411.85.202203181601-0/x86_64/rhcos-411.85.202203181601-0-live.x86_64.iso' 
+INFO  
+~~~
 
 Once the agent create image command completes we are left with a agent.iso image which is in fact our OpenShift install ISO:
 
@@ -433,4 +447,8 @@ Once the first virtual machine is started we can switch over to the console and 
 
 <img src="asus3-vm1-console.png" style="width: 800px;" border=0/>
 
-Deploy
+During the boot process the system will come up to a standard login prompt on the console.  Then in the background on the host it will start pulling in the required containers to run the familiar Assisted Installer UI.  I gave this process about 5 minutes before I attempted to access the web UI.   To access the web UI we can point our browser to the ipaddress of node we just booted and port 8080:
+
+<img src="ai-boot.png" style="width: 800px;" border=0/>
+
+
