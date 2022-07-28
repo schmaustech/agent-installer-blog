@@ -26,9 +26,109 @@ Write something about the workflow describing the image below
 
 <img src="node-lifecycle.png" style="width: 1000px;" border=0/>
 
-Show how to get the binary here
+Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirements will go away once OpenShift 4.12 goes GA at which time the Agent-based Installer will be GA as well.
 
-Now that we have downloaded the binary lets go ahead and create a directory that will contain the required manifests we need for our deployment that will get injected into the ISO we build:
+So lets go ahead and grab the OpenShift installer source code from Github and checkout the agent-installer branch:
+
+~~~bash
+$ git clone https://github.com/openshift/installer
+Cloning into 'installer'...
+remote: Enumerating objects: 204497, done.
+remote: Counting objects: 100% (210/210), done.
+remote: Compressing objects: 100% (130/130), done.
+remote: Total 204497 (delta 99), reused 153 (delta 70), pack-reused 204287
+Receiving objects: 100% (204497/204497), 873.44 MiB | 10.53 MiB/s, done.
+Resolving deltas: 100% (132947/132947), done.
+Updating files: 100% (86883/86883), done.
+
+$ cd installer/
+$ git checkout agent-installer
+Branch 'agent-installer' set up to track remote branch 'agent-installer' from 'origin'.
+Switched to a new branch 'agent-installer'
+
+$ git branch
+* agent-installer
+  master
+~~~
+
+Once we have the source code checked out we need to go ahead and build the the OpenShift install binary:
+
+~~~bash
+$ hack/build.sh
++ minimum_go_version=1.17
+++ go version
+++ cut -d ' ' -f 3
++ current_go_version=go1.17.7
+++ version 1.17.7
+++ IFS=.
+++ printf '%03d%03d%03d\n' 1 17 7
+++ unset IFS
+++ version 1.17
+++ IFS=.
+++ printf '%03d%03d%03d\n' 1 17
+++ unset IFS
++ '[' 001017007 -lt 001017000 ']'
++ make -C terraform all
+make: Entering directory '/home/bschmaus/installer/terraform'
+cd providers/alicloud; \
+(...)
+make: Leaving directory '/home/bschmaus/installer/terraform'
++ copy_terraform_to_mirror
+++ go env GOOS
+++ go env GOARCH
++ TARGET_OS_ARCH=linux_amd64
++ rm -rf '/home/bschmaus/installer/pkg/terraform/providers/mirror/*/'
++ find /home/bschmaus/installer/terraform/bin/ -maxdepth 1 -name 'terraform-provider-*.zip' -exec bash -c '
+      providerName="$(basename "$1" | cut -d - -f 3 | cut -d . -f 1)"
+      targetOSArch="$2"
+      dstDir="${PWD}/pkg/terraform/providers/mirror/openshift/local/$providerName"
+      mkdir -p "$dstDir"
+      echo "Copying $providerName provider to mirror"
+      cp "$1" "$dstDir/terraform-provider-${providerName}_1.0.0_${targetOSArch}.zip"
+    ' shell '{}' linux_amd64 ';'
+Copying alicloud provider to mirror
+Copying aws provider to mirror
+Copying azureprivatedns provider to mirror
+Copying azurerm provider to mirror
+Copying azurestack provider to mirror
+Copying google provider to mirror
+Copying ibm provider to mirror
+Copying ignition provider to mirror
+Copying ironic provider to mirror
+Copying libvirt provider to mirror
+Copying local provider to mirror
+Copying nutanix provider to mirror
+Copying openstack provider to mirror
+Copying ovirt provider to mirror
+Copying random provider to mirror
+Copying vsphere provider to mirror
+Copying vsphereprivate provider to mirror
++ mkdir -p /home/bschmaus/installer/pkg/terraform/providers/mirror/terraform/
++ cp /home/bschmaus/installer/terraform/bin/terraform /home/bschmaus/installer/pkg/terraform/providers/mirror/terraform/
++ MODE=release
+++ git rev-parse --verify 'HEAD^{commit}'
++ GIT_COMMIT=d74e210f30edf110764d87c8223a18b8a9952253
+++ git describe --always --abbrev=40 --dirty
++ GIT_TAG=unreleased-master-6040-gd74e210f30edf110764d87c8223a18b8a9952253
++ DEFAULT_ARCH=amd64
++ GOFLAGS=-mod=vendor
++ LDFLAGS=' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6040-gd74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.Commit=d74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.defaultArch=amd64'
++ TAGS=
++ OUTPUT=bin/openshift-install
++ export CGO_ENABLED=0
++ CGO_ENABLED=0
++ case "${MODE}" in
++ LDFLAGS=' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6040-gd74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.Commit=d74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.defaultArch=amd64 -s -w'
++ TAGS=' release'
++ test '' '!=' y
++ go generate ./data
+writing assets_vfsdata.go
++ echo ' release'
++ grep -q libvirt
++ go build -mod=vendor -ldflags ' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6040-gd74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.Commit=d74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.defaultArch=amd64 -s -w' -tags ' release' -o bin/openshift-install ./cmd/openshift-install
+~~~
+
+Now that we have the binary lets go ahead and create a directory that will contain the required manifests we need for our deployment that will get injected into the ISO we build:
 
 ~~~bash
 $ cd ~/
