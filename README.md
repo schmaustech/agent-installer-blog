@@ -2,23 +2,25 @@
 
 <img src="agent-based.png" style="width: 1000px;" border=0/>
 
-With OpenShift 4.11 we are introducing a pre-release version of the new agent-based installer for OpenShift. Installing clusters on bare metal nodes has never been so easy. Our aim is to provide the flexibility of user-provided infrastructure (UPI) installs with the ease of use of the OpenShift Assisted Installer, while in fully disconnected or air-gapped environments. We have worked with users from different industries and incorporated their feedback and use cases in its design. To do this we are combining existing technologies and experience coming from the Assisted Installer and the installer-provisioned infrastructure (IPI). 
+With OpenShift 4.11 we are introducing a pre-release version of the [new agent-based installer for OpenShift](https://github.com/openshift/installer/tree/agent-installer) that we are adding to the official OpenShift installer. With this new <code>agent</code> subcommand, installing clusters on premise has never been so easy, while allowing as many types of designs as possible. Our aim is to provide the flexibility of [user-provided infrastructure (UPI)](https://docs.openshift.com/container-platform/4.11/installing/installing_bare_metal/installing-bare-metal.html) installs with the ease of use that the [OpenShift Assisted Installer](https://docs.openshift.com/container-platform/4.11/installing/installing_on_prem_assisted/installing-on-prem-assisted.html) offers for connected environments, while in fully disconnected or air-gapped environments. 
+
+We have worked with users from different industries and incorporated their feedback and use cases in its design. To do this we are combining existing technologies and experience coming from the Assisted Installer, the [installer-provisioned infrastructure (IPI)](https://docs.openshift.com/container-platform/4.11/installing/installing_bare_metal_ipi/ipi-install-overview.html) among others.
 
 ## Use Cases We are Addressing
 
-* Quickly deploy isolated OpenShift clusters on premise of any topology
+* Quickly deploy isolated OpenShift clusters on premise of any topology.
 * Install a cluster zero with OpenShift management components such as Red Hat Advanced Cluster Management for Kubernetes (ACM), GitOps, Quay, and components to support your other clusters.
 * As we start with Hypershift, install the OpenShift cluster that will house the control planes for all the other clusters.
 
 ## Features Included and/or In Progress
 
-* Create bootable images with openshift-install to deploy your clusters
-* In-place bootstrap, no extra node required
-* Works in fully disconnected deployments
-* Works with a mirrored local registry
-* Supports single node OpenShift (SNO), compact 3-node clusters, and highly available topologies
-* Can be automated with third party tools
-* User-friendly interface based on the Assisted Installer
+* Create bootable images with openshift-install to deploy your clusters.
+* In-place bootstrap, no extra node required.
+* Works in fully disconnected deployments.
+* Works with a mirrored local registry.
+* Supports single node OpenShift (SNO), compact 3-node clusters, and highly available topologies.
+* Can be automated with third party tools.
+* User-friendly interface based on the Assisted Installer.
 
 ## Getting Familiar with Agent-Based OpenShift Installer
 
