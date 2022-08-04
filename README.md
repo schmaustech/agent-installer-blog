@@ -24,7 +24,7 @@ We have worked with users from different industries and incorporated their feedb
 
 ## Getting Familiar with Agent-Based OpenShift Installer
 
-Write something about the workflow describing the image below
+Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike the baremetal IPI OpenShift installation there is no need for a provisioning host.  This is because one of the nodes becomes the bootstrap host early in the boot process and runs the assisted service.  The assisted service validates and confirms all hosts checking in meet the requirements and triggers a cluster deployment.   Once the cluster deployment kicks off all the nodes get their RHCOS image written to disk but only the non-bootstrap nodes reboot and begin to instantiate a cluster.  Once they come up then the original bootstrap node reboots and comes up from disk to join the cluster.  At that point the bootstrapping is complete and the cluster comes up just like any other installation method until finalized.
 
 <img src="node-lifecycle.png" style="width: 1000px;" border=0/>
 
@@ -453,6 +453,8 @@ $ pwd
 
 $ export KUBECONFIG=/home/bschmaus/installer/cluster-manifests/auth/kubeconfig
 
+
+
 ~~~
 
 Once the cluster installation has completed we can run a few commands to validate that indeed the cluster is up and operational:
@@ -499,3 +501,5 @@ operator-lifecycle-manager-packageserver   4.11.0-rc.7   True        False      
 service-ca                                 4.11.0-rc.7   True        False         False      29m     
 storage                                    4.11.0-rc.7   True        False         False      29m     
 ~~~
+
+Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure.  
