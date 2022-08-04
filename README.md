@@ -396,7 +396,7 @@ root@192.168.0.22's password:
 agent.iso 
 ~~~
 
-With the image moved over to the hypervisor host I went ahead and ensured each virtual machine we are using (asus3-vm[1-3]) has the image set.  Further the hosts are designed boot off the ISO if the disk is empty.  We can confirm everything is ready with the following output:
+With the image moved over, I logged into the hypervisor host and ensured each virtual machine we are using (asus3-vm[1-3]) has the image set.  Further the hosts are designed boot off the ISO if the disk is blank.  We can confirm everything is ready with the following output:
 
 ~~~bash
 # virsh list --all
@@ -428,19 +428,74 @@ With the image moved over to the hypervisor host I went ahead and ensured each v
  sdb      /var/lib/libvirt/images/agent.iso
 ~~~
 
-Now lets go ahead and start the first virtual machine:
+Now lets go ahead and start the virtual machines all at the same time from the hypervisor host:
 
 ~~~bash
 # virsh start asus3-vm1
 Domain asus3-vm1 started
+
+# virsh start asus3-vm2
+Domain asus3-vm1 started
+
+# virsh start asus3-vm3
+Domain asus3-vm1 started
 ~~~
 
-Once the first virtual machine is started we can switch over to the console and watch it boot up:
+If we switch over to the console of one of the virtual machines using virt-manager we should see the CoreOSLive boot screen:
 
 <img src="asus3-vm1-console.png" style="width: 800px;" border=0/>
 
-During the boot process the system will come up to a standard login prompt on the console.  Then in the background on the host it will start pulling in the required containers to run the familiar Assisted Installer UI.  I gave this process about 5 minutes before I attempted to access the web UI.   To access the web UI we can point our browser to the ipaddress of node we just booted and port 8080:
+With the nodes booting we can return to the installer directory where we built the agent image and watch the installation continue.   To do this we need to first export the kubeconfig and then issue the command to wait-for install-complete:
 
-<img src="ai-boot.png" style="width: 800px;" border=0/>
+~~~bash
+$ pwd
+~/installer
 
+$ export KUBECONFIG=/home/bschmaus/installer/cluster-manifests/auth/kubeconfig
 
+~~~
+
+Once the cluster installation has completed we can run a few commands to validate that indeed the cluster is up and operational:
+
+~~~bash
+$ oc get nodes
+NAME        STATUS   ROLES           AGE   VERSION
+asus3-vm1   Ready    master,worker   16m   v1.24.0+9546431
+asus3-vm2   Ready    master,worker   30m   v1.24.0+9546431
+asus3-vm3   Ready    master,worker   30m   v1.24.0+9546431
+
+$ oc get co
+NAME                                       VERSION       AVAILABLE   PROGRESSING   DEGRADED   SINCE   MESSAGE
+authentication                             4.11.0-rc.7   True        False         False      4m38s   
+baremetal                                  4.11.0-rc.7   True        False         False      28m     
+cloud-controller-manager                   4.11.0-rc.7   True        False         False      30m     
+cloud-credential                           4.11.0-rc.7   True        False         False      33m     
+cluster-autoscaler                         4.11.0-rc.7   True        False         False      28m     
+config-operator                            4.11.0-rc.7   True        False         False      29m     
+console                                    4.11.0-rc.7   True        False         False      11m     
+csi-snapshot-controller                    4.11.0-rc.7   True        False         False      29m     
+dns                                        4.11.0-rc.7   True        False         False      29m     
+etcd                                       4.11.0-rc.7   True        False         False      27m     
+image-registry                             4.11.0-rc.7   True        False         False      14m     
+ingress                                    4.11.0-rc.7   True        False         False      20m     
+insights                                   4.11.0-rc.7   True        False         False      52s     
+kube-apiserver                             4.11.0-rc.7   True        False         False      25m     
+kube-controller-manager                    4.11.0-rc.7   True        False         False      26m     
+kube-scheduler                             4.11.0-rc.7   True        False         False      25m     
+kube-storage-version-migrator              4.11.0-rc.7   True        False         False      29m     
+machine-api                                4.11.0-rc.7   True        False         False      25m     
+machine-approver                           4.11.0-rc.7   True        False         False      28m     
+machine-config                             4.11.0-rc.7   True        False         False      28m     
+marketplace                                4.11.0-rc.7   True        False         False      29m     
+monitoring                                 4.11.0-rc.7   True        False         False      13m     
+network                                    4.11.0-rc.7   True        False         False      30m     
+node-tuning                                4.11.0-rc.7   True        False         False      28m     
+openshift-apiserver                        4.11.0-rc.7   True        False         False      14m     
+openshift-controller-manager               4.11.0-rc.7   True        False         False      25m     
+openshift-samples                          4.11.0-rc.7   True        False         False      20m     
+operator-lifecycle-manager                 4.11.0-rc.7   True        False         False      29m     
+operator-lifecycle-manager-catalog         4.11.0-rc.7   True        False         False      29m     
+operator-lifecycle-manager-packageserver   4.11.0-rc.7   True        False         False      23m     
+service-ca                                 4.11.0-rc.7   True        False         False      29m     
+storage                                    4.11.0-rc.7   True        False         False      29m     
+~~~
