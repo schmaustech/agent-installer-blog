@@ -164,239 +164,202 @@ $ pwd
 $ mkdir cluster-manifests
 ~~~
 
-With the directory created we can move onto creating the agent cluster install resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the api and ingress vip and the cluster networking.   In my example I will be deploying a 3 node compact cluster which referenced a cluster deployment named kni22:
+With the directory created we can move onto creating the install configuration resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the api and ingress vip, physical node mac addresses and the cluster networking. In my example I will be deploying a 3 node compact cluster which referenced a cluster deployment named kni22.   We will also define the image content source policy and include our cert for our registry since we are doing a disconnected installation.
 
 ~~~bash
-$ cat << EOF > ./manifests/agent-cluster-install.yaml
-apiVersion: extensions.hive.openshift.io/v1beta1
-kind: AgentClusterInstall
-metadata:
-  name: kni22
-  namespace: kni22
-spec:
-  apiVIP: 192.168.0.125
-  ingressVIP: 192.168.0.126
-  clusterDeploymentRef:
-    name: kni22
-  imageSetRef:
-    name: openshift-v4.10.0
-  networking:
-    clusterNetwork:
-    - cidr: 10.128.0.0/14
-      hostPrefix: 23
-    serviceNetwork:
-    - 172.30.0.0/16
-  provisionRequirements:
-    controlPlaneAgents: 3
-    workerAgents: 0 
-  sshPublicKey: 'INSERT PUBLIC SSH KEY HERE'
-EOF
-~~~
-
-Next we will create the cluster deployment resource file which defines the cluster name, domain, and other details:
-
-~~~bash
-$ cat << EOF > ./manifests/cluster-deployment.yaml
-apiVersion: hive.openshift.io/v1
-kind: ClusterDeployment
-metadata:
-  name: kni22
-  namespace: kni22
-spec:
-  baseDomain: schmaustech.com
-  clusterInstallRef:
-    group: extensions.hive.openshift.io
-    kind: AgentClusterInstall
-    name: kni22-agent-cluster-install
-    version: v1beta1
-  clusterName: kni22
-  controlPlaneConfig:
-    servingCertificates: {}
-  platform:
-    agentBareMetal:
-      agentSelector:
-        matchLabels:
-          bla: aaa
-  pullSecretRef:
-    name: pull-secret
-EOF
-~~~
-
-Moving on we now create the cluster image set resource file which contains OpenShift image information such as the repository and image name.  This will be the version of the cluster that gets deployed in our 3 node compact cluster.  In this example we are using 4.10.23:
-
-~~~bash
-$ cat << EOF > ./manifests/cluster-image-set.yaml
-apiVersion: hive.openshift.io/v1
-kind: ClusterImageSet
-metadata:
-  name: ocp-release-4.10.23-x86-64-for-4.10.0-0-to-4.11.0-0
-spec:
-  releaseImage: quay.io/openshift-release-dev/ocp-release:4.10.23-x86_64
-EOF
-~~~
-
-Next we define the infrastructure environment file which  contains information for pulling OpenShift onto the target host nodes we are deploying to:
-
-~~~bash
-$ cat << EOF > ./manifests/infraenv.yaml 
-apiVersion: agent-install.openshift.io/v1beta1
-kind: InfraEnv
-metadata:
-  name: kni22
-  namespace: kni22
-spec:
-  clusterRef:
-    name: kni22  
-    namespace: kni22
-  pullSecretRef:
-    name: pull-secret
-  sshAuthorizedKey: 'INSERT PUBLIC SSH KEY HERE'
-  nmStateConfigLabelSelector:
-    matchLabels:
-      kni22-nmstate-label-name: kni22-nmstate-label-value
-EOF
-~~~
-
-The next file is the nmstate configuration file and this file provides all the details for all of the host that will be booted using the ISO image we are going to create.   Since we have a 3 node compact cluster to deploy we notice that in the file below we have specified three nmstate configurations.  Each configuration is for a node and generates a static IP address on the nodes enp2s0 interface that matches the MAC address defined.   This enables the ISO to boot up and not necessarily require DHCP in the environment which is what a lot of customers are looking for.   Again my example has 3 configurations but if we had worker nodes we would add those in too.   Lets go ahead and create the file:
-
-~~~bash
-$ cat << EOF > ./manifests/nmstateconfig.yaml
----
-apiVersion: agent-install.openshift.io/v1beta1
-kind: NMStateConfig
-metadata:
-  name: mynmstateconfig01
-  namespace: openshift-machine-api
-  labels:
-    kni22-nmstate-label-name: kni22-nmstate-label-value
-spec:
-  config:
-    interfaces:
-      - name: enp2s0
-        type: ethernet
-        state: up
-        mac-address: 52:54:00:e7:05:72
-        ipv4:
-          enabled: true
-          address:
-            - ip: 192.168.0.116
-              prefix-length: 24
-          dhcp: false
-    dns-resolver:
-      config:
-        server:
-          - 192.168.0.10
-    routes:
-      config:
-        - destination: 0.0.0.0/0
-          next-hop-address: 192.168.0.1
-          next-hop-interface: enp2s0
-          table-id: 254
-  interfaces:
-    - name: "enp2s0"
-      macAddress: 52:54:00:e7:05:72
----
-apiVersion: agent-install.openshift.io/v1beta1
-kind: NMStateConfig
-metadata:
-  name: mynmstateconfig02
-  namespace: openshift-machine-api
-  labels:
-    kni22-nmstate-label-name: kni22-nmstate-label-value
-spec:
-  config:
-    interfaces:
-      - name: enp2s0
-        type: ethernet
-        state: up
-        mac-address: 52:54:00:95:fd:f3
-        ipv4:
-          enabled: true
-          address:
-            - ip: 192.168.0.117
-              prefix-length: 24
-          dhcp: false
-    dns-resolver:
-      config:
-        server:
-          - 192.168.0.10
-    routes:
-      config:
-        - destination: 0.0.0.0/0
-          next-hop-address: 192.168.0.1
-          next-hop-interface: enp2s0
-          table-id: 254
-  interfaces:
-    - name: "enp2s0"
-      macAddress: 52:54:00:95:fd:f3
----
-apiVersion: agent-install.openshift.io/v1beta1
-kind: NMStateConfig
-metadata:
-  name: mynmstateconfig03
-  namespace: openshift-machine-api
-  labels:
-    kni22-nmstate-label-name: kni22-nmstate-label-value
-spec:
-  config:
-    interfaces:
-      - name: enp2s0
-        type: ethernet
-        state: up
-        mac-address: 52:54:00:e8:b9:18
-        ipv4:
-          enabled: true
-          address:
-            - ip: 192.168.0.118
-              prefix-length: 24
-          dhcp: false
-    dns-resolver:
-      config:
-        server:
-          - 192.168.0.10
-    routes:
-      config:
-        - destination: 0.0.0.0/0
-          next-hop-address: 192.168.0.1
-          next-hop-interface: enp2s0
-          table-id: 254
-  interfaces:
-    - name: "enp2s0"
-      macAddress: 52:54:00:e8:b9:18
-EOF
-~~~
-
-The final file we need to create is the pull-secret resource file which contains the pull-secret values so that our cluster can pull in the required OpenShift images to instantiate the cluster:
-
-~~~bash
-$ cat << EOF > ./manifests/pull-secret.yaml 
+$ cat << EOF > ./cluster-manifests/install-config.yaml
 apiVersion: v1
-kind: Secret
-type: kubernetes.io/dockerconfigjson
+baseDomain: schmaustech.com
+compute:
+- architecture: amd64
+  hyperthreading: Enabled
+  name: worker
+  replicas: 0
+controlPlane:
+  architecture: amd64
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
 metadata:
-  name: pull-secret
-  namespace: kni22
-stringData:
-  .dockerconfigjson: 'INSERT JSON FORMATTED PULL-SECRET'
+  name: kni22
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  machineNetwork:
+  - cidr: 192.168.0.0/24
+  networkType: OVNKubernetes
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  baremetal:
+    hosts:
+      - name: asus3-vm1
+        role: master
+        bootMACAddress: 52:54:00:e7:05:72
+      - name: asus3-vm2
+        role: master
+        bootMACAddress: 52:54:00:95:fd:f3
+      - name: asus3-vm3
+        role: master
+        bootMACAddress: 52:54:00:e8:b9:18
+    apiVIP: "192.168.0.125"
+    ingressVIP: "192.168.0.126"
+pullSecret: ''{ "auths": { "provisioning.schmaustech.com:5000": {"auth": "ZHVtbXk6ZHVtbXk=","email": "bschmaus@schmaustech.com" } } }''
+sshKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCoy2/8SC8K+9PDNOqeNady8xck4AgXqQkf0uusYfDJ8IS4pFh178AVkz2sz3GSbU41CMxO6IhyQS4Rga3Ft/VlW6ZAW7icz3mw6IrLRacAAeY1BlfxfupQL/yHjKSZRze9vDjfQ9UDqlHF/II779Kz5yRKYqXsCt+wYESU7DzdPuGgbEKXrwi9GrxuXqbRZOz5994dQW7bHRTwuRmF9KzU7gMtMCah+RskLzE46fc2e4zD1AKaQFaEm4aGbJjQkELfcekrE/VH3i35cBUDacGcUYmUEaco3c/+phkNP4Iblz4AiDcN/TpjlhbU3Mbx8ln6W4aaYIyC4EVMfgvkRVS1xzXcHexs1fox724J07M1nhy+YxvaOYorQLvXMGhcBc9Z2Au2GA5qAr5hr96AHgu3600qeji0nMM/0HoiEVbxNWfkj4kAegbItUEVBAWjjpkncbe5Ph9nF2DsBrrg4TsJIplYQ+lGewzLTm/cZ1DnIMZvTY/Vnimh7qa9aRrpMB0= bschmaus@provisioning'
+imageContentSources:
+- mirrors:
+  - provisioning.schmaustech.com:5000/ocp4/openshift4
+  source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+- mirrors:
+  - provisioning.schmaustech.com:5000/ocp4/openshift4
+  source: registry.svc.ci.openshift.org/ocp/release
+additionalTrustBundle: |
+  -----BEGIN CERTIFICATE-----
+  MIIGKDCCBBCgAwIBAgIUVu+F6PrAXwxVfPs4D0KQA3+50y4wDQYJKoZIhvcNAQEL
+  BQAwgYQxCzAJBgNVBAYTAlVTMRYwFAYDVQQIDA1Ob3J0aENhcm9saW5hMRAwDgYD
+  VQQHDAdSYWxlaWdoMRAwDgYDVQQKDAdSZWQgSGF0MRIwEAYDVQQLDAlNYXJrZXRp
+  bmcxJTAjBgNVBAMMHHByb3Zpc2lvbmluZy5zY2htYXVzdGVjaC5jb20wHhcNMjIw
+  MjE2MjAzNjQwWhcNMjMwMjE2MjAzNjQwWjCBhDELMAkGA1UEBhMCVVMxFjAUBgNV
+  BAgMDU5vcnRoQ2Fyb2xpbmExEDAOBgNVBAcMB1JhbGVpZ2gxEDAOBgNVBAoMB1Jl
+  ZCBIYXQxEjAQBgNVBAsMCU1hcmtldGluZzElMCMGA1UEAwwccHJvdmlzaW9uaW5n
+  LnNjaG1hdXN0ZWNoLmNvbTCCAiIwDQYJKoZIhvcNAQEBBQADggIPADCCAgoCggIB
+  AKfEtYL50jb7DYOMn5gF2PCfnn/ah/m3K/cHXFzu3pjeZ8rlsO9yV+u+TYGmQnMK
+  obfKUB5F2twMkGEdX3cHyRvo0YiNVzlS9HEt8A1MejlLBGaNvLXLKCpy5eC1tVwh
+  51Nj4pscmACd1WNla+KzYqUURRW90SEEN6jNgoabuip2vXLRZLYqDG8uAZ+fFLnz
+  Hz0/pbR0bv1mvA0eppLgvGS7DBQdl+LoNg9ZZj/0CgveCmjMFH+5Dw9hMIbPMEpX
+  zrG8DgzgME5jIJYzsMu7aOBmQgappfHoU25RC87/vDfGJI65/bQESo7mdLnSmccz
+  ADssp4SVnWPOfWotWNalh7hN64Xp4lbf4Kz2ESvQXU+oOwxhlEZhhJJ8KP7Ei6AL
+  4mvXSWgXB69GQHwRJ3bi/AdaQC8LcaIRPm+Toy+UUgfNxtJLyi55lsIYjpig7ndW
+  vg9kEQUAWz9pr95hn2l9jodGmAcli2s4UDbvhW464NjaVrf8vttpcgxvL3KZBSEZ
+  JjkCiQMy5n+BEDZJeiMGDz4guiRk7QW9WrKw8vhPRhKo4ga8kS4bBd+Y1FXrhfiP
+  n5V72sSZbPyi66HXGVJUehsbxynfSebaT0ox29j4JyypvzMgMhUCh0tINHqGhGxy
+  Rrm67cy9i20JlOXJ9pIXA8REg9avlH4o0WZ1pC63MTiRAgMBAAGjgY8wgYwwHQYD
+  VR0OBBYEFFVYOJ5T/qQL71IYyy9iA9CVME9zMB8GA1UdIwQYMBaAFFVYOJ5T/qQL
+  71IYyy9iA9CVME9zMA8GA1UdEwEB/wQFMAMBAf8wJwYDVR0RBCAwHoIccHJvdmlz
+  aW9uaW5nLnNjaG1hdXN0ZWNoLmNvbTAQBgNVHSAECTAHMAUGAyoDBDANBgkqhkiG
+  9w0BAQsFAAOCAgEAoTmLrWsAA0vTq5ALmDa4HBE+qoygqgU5MxDpWZoObGXmo+TK
+  se51NPaMyCt3dMsDY8jeDHchr4tVr272J3jDK6ORhQ5v43qJYgAN9Ilnu165QtqD
+  WICnXQvnb8PN0zw0ilm9qB6gSwo+1dvHTR5BJ7B3au7WarpUeC8CclIAzEJjSwEo
+  Qtdown9cFyC+bShFvL+jZCe7IuWV/AQDZGodNgTAWX0frUklZBcMyJ3LbazCMpb/
+  INvO0D1ZrFt8U1QujCKY+2ba7cxnuNwzrJwugQU9FSYrsGHQCthOH6tNwxhuW7Rh
+  UqIFLwS25nrfYiu+9EiXXGvjvymCGAwX4d4vGFAJsdPZgkDa3QuW6dq3IF4hkT9v
+  loe/LSt9Dr7l9baqnVgg67qc/99T56uI5tiCu8UjJQpHhDDhoJJRnwOOEdStk9hR
+  k8niIe373gQ7RBu/jJ0gt/h8CzKRbuRAIS7BTmvOPUe1pGjWh8ZaWyMdQE9/k8cQ
+  hHXB0vjqxw15+DPso7SvxWM2Hzhdj5E/cDlXlQfkEEzk6Qk9+I4WY71qsRdguHZl
+  q8YYyrzZ5ZiHHHIFfKDZ4Tr50buqLG1Eh34jukA+La7kdOjQhMF4jjdWHJdg/fpn
+  wo0DwOKYVO1M1IUl162LHGJDGUr0RUfriX4pKsdg2LvaxuBeNA6HI3QQO+c=
+  -----END CERTIFICATE-----
 EOF
 ~~~
 
-At this point we should now have our six required files defined to build our Agent Installer ISO:
+The next configuration file we need to create is the agent configuration resource file.   This file will contain the details of the actual hosts in relation to their networking configuration.   Looking close we can see that for each host we define the interfac, mac address, ipaddress if static and a DNS resolver and routes.   The configuration is very similar to a NMState configuration.  However one item that is a bit different is the rendezvousIP address.   This is the ipaddress of the host that will become the temporary bootstrap node while the cluster is installing.  This ipaddress shoule match one of the other nodes whether they are using a static ipaddress or a dhcp reservation ipaddress:
 
 ~~~bash
-$ ls -1 ./manifests/
-agent-cluster-install.yaml
-cluster-deployment.yaml
-cluster-image-set.yaml
-infraenv.yaml
-nmstateconfig.yaml
-pull-secret.yaml 
+$ cat << EOF > ./cluster-manifests/agent-config.yaml
+kind: AgentConfig
+metadata:
+  name: kni22
+spec:
+  rendezvousIP: 192.168.0.116
+  hosts:
+    - hostname: asus3-vm1
+      interfaces:
+       - name: enp2s0
+         macAddress: 52:54:00:e7:05:72
+      networkConfig:
+        interfaces:
+          - name: enp2s0
+            type: ethernet
+            state: up
+            mac-address: 52:54:00:e7:05:72
+            ipv4:
+              enabled: true
+              address:
+                - ip: 192.168.0.116
+                  prefix-length: 23
+              dhcp: false
+        dns-resolver:
+          config:
+            server:
+              - 192.168.0.10
+        routes:
+          config:
+            - destination: 0.0.0.0/0
+              next-hop-address: 192.168.0.1
+              next-hop-interface: enp2s0
+              table-id: 254
+    - hostname: asus3-vm2
+      interfaces:
+       - name: enp2s0
+         macAddress: 52:54:00:95:fd:f3
+      networkConfig:
+        interfaces:
+          - name: enp2s0
+            type: ethernet
+            state: up
+            mac-address: 52:54:00:95:fd:f3
+            ipv4:
+              enabled: true
+              address:
+                - ip: 192.168.0.117
+                  prefix-length: 23
+              dhcp: false
+        dns-resolver:
+          config:
+            server:
+              - 192.168.0.10
+        routes:
+          config:
+            - destination: 0.0.0.0/0
+              next-hop-address: 192.168.0.1
+              next-hop-interface: enp2s0
+              table-id: 254
+    - hostname: asus3-vm3
+      interfaces:
+       - name: enp2s0
+         macAddress: 52:54:00:e8:b9:18
+      networkConfig:
+        interfaces:
+          - name: enp2s0
+            type: ethernet
+            state: up
+            mac-address: 52:54:00:e8:b9:18
+            ipv4:
+              enabled: true
+              address:
+                - ip: 192.168.0.118
+                  prefix-length: 23
+              dhcp: false
+        dns-resolver:
+          config:
+            server:
+              - 192.168.0.10
+        routes:
+          config:
+            - destination: 0.0.0.0/0
+              next-hop-address: 192.168.0.1
+              next-hop-interface: enp2s0
+              table-id: 254
+EOF
 ~~~
 
-Generate install-config.yaml
+At this point we have now created two configuration file: the install-config.yaml and the agent-config.yaml.  Both of which are under the cluster-manifests directory:
 
 ~~~bash
-Install-config.yaml
+$ ls -1 cluster-manifests/
+agent-config.yaml
+install-config.yaml
+~~~
+
+One more step we need to execute before creating our image is to set our image release override to ensure we are dpeloying the version of OpenShift we want to deploy.  In my example my local disconnected registry contains the following OpenShift release 4.11.0-rc.7.  So we will want to set the override to that version by executing the following:
+
+~~~bash
+export VERSION="4.11.0-rc.7"
+export OPENSHIFT_RELEASE_IMAGE="registry.svc.ci.openshift.org/ocp/release:$VERSION"
+export LOCAL_REG='provisioning.schmaustech.com:5000'
+export export LOCAL_REPO='ocp4/openshift4'
+export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=${LOCAL_REG}/${LOCAL_REPO}:${VERSION}
 ~~~
 
 We are now ready to use the Openshift install binary we compiled earlier with the Agent Installer code to generate our ephemeral OpenShift ISO.   We do this by issuing the following command which introduces the agent option.  This in turn will read in the manifest details we generated and download the corresponding RHCOS image and then inject our details into the image writing out a file called agent.iso:
