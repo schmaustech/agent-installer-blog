@@ -205,7 +205,7 @@ platform:
         bootMACAddress: 52:54:00:e8:b9:18
     apiVIP: "192.168.0.125"
     ingressVIP: "192.168.0.126"
-pullSecret: ''{ "auths": { "provisioning.schmaustech.com:5000": {"auth": "ZHVtbXk6ZHVtbXk=","email": "bschmaus@schmaustech.com" } } }''
+pullSecret: '{ "auths": { "provisioning.schmaustech.com:5000": {"auth": "ZHVtbXk6ZHVtbXk=","email": "bschmaus@schmaustech.com" } } }'
 sshKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCoy2/8SC8K+9PDNOqeNady8xck4AgXqQkf0uusYfDJ8IS4pFh178AVkz2sz3GSbU41CMxO6IhyQS4Rga3Ft/VlW6ZAW7icz3mw6IrLRacAAeY1BlfxfupQL/yHjKSZRze9vDjfQ9UDqlHF/II779Kz5yRKYqXsCt+wYESU7DzdPuGgbEKXrwi9GrxuXqbRZOz5994dQW7bHRTwuRmF9KzU7gMtMCah+RskLzE46fc2e4zD1AKaQFaEm4aGbJjQkELfcekrE/VH3i35cBUDacGcUYmUEaco3c/+phkNP4Iblz4AiDcN/TpjlhbU3Mbx8ln6W4aaYIyC4EVMfgvkRVS1xzXcHexs1fox724J07M1nhy+YxvaOYorQLvXMGhcBc9Z2Au2GA5qAr5hr96AHgu3600qeji0nMM/0HoiEVbxNWfkj4kAegbItUEVBAWjjpkncbe5Ph9nF2DsBrrg4TsJIplYQ+lGewzLTm/cZ1DnIMZvTY/Vnimh7qa9aRrpMB0= bschmaus@provisioning'
 imageContentSources:
 - mirrors:
@@ -365,33 +365,33 @@ export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=${LOCAL_REG}/${LOCAL_REPO}:${VER
 We are now ready to use the Openshift install binary we compiled earlier with the Agent Installer code to generate our ephemeral OpenShift ISO.   We do this by issuing the following command which introduces the agent option.  This in turn will read in the manifest details we generated and download the corresponding RHCOS image and then inject our details into the image writing out a file called agent.iso:
 
 ~~~bash
-$ bin/openshift-install agent create image 
-INFO adding MAC interface map to host static network config - Name:  enp2s0  MacAddress: 52:54:00:e7:05:72 
-INFO adding MAC interface map to host static network config - Name:  enp2s0  MacAddress: 52:54:00:95:fd:f3 
-INFO adding MAC interface map to host static network config - Name:  enp2s0  MacAddress: 52:54:00:e8:b9:18 
-INFO[0000] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
-INFO[0000] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
-INFO[0001] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
-INFO[0001] Start configuring static network for 3 hosts  pkg=manifests
-INFO[0001] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
-INFO[0001] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
-INFO[0001] Adding NMConnection file <enp2s0 .nmconnection="">  pkg=manifests
-INFO Obtaining RHCOS image file from 'https://rhcos-redirector.apps.art.xq1c.p1.openshiftapps.com/art/storage/releases/rhcos-4.11/411.85.202203181601-0/x86_64/rhcos-411.85.202203181601-0-live.x86_64.iso' 
-INFO  
+$ bin/openshift-install agent create image --log-level debug --dir cluster-manifests
+WARNING Found override for release image. Please be warned, this is not advised 
+WARNING Found override for release image. Please be warned, this is not advised 
+INFO[0000] Start configuring static network for 3 hosts  pkg=manifests
+INFO[0000] Adding NMConnection file <enp2s0.nmconnection>  pkg=manifests
+INFO[0001] Adding NMConnection file <enp2s0.nmconnection>  pkg=manifests
+INFO[0001] Adding NMConnection file <enp2s0.nmconnection>  pkg=manifests
+INFO[0001] Extracting base ISO from release payload     
+INFO Consuming Install Config from target directory 
+INFO Consuming Agent Config from target directory 
+
 ~~~
 
-Once the agent create image command completes we are left with a agent.iso image which is in fact our OpenShift install ISO:
+Once the agent create image command completes we are left with a agent.iso image and an auth directory that containers kubeconfig:
 
 ~~~bash
-$ ls -l ./output/
-total 1073152
--rw-rw-r--. 1 bschmaus bschmaus 1098907648 May 20 08:55 agent.iso
+$ ls -1 cluster-manifests/
+agent.iso
+auth
+$ ls -1 cluster-manifests/auth/
+kubeconfig
 ~~~
 
 Since the nodes I will be using to demonstrate this 3 node compact cluster are virtual machines all on the same KVM hypervisor I will go ahead and copy the agent.iso image over to that host:
 
 ~~~bash
-$ scp ./output/agent.iso root@192.168.0.22:/var/lib/libvirt/images/
+$ scp ./cluster-manifests/agent.iso root@192.168.0.22:/var/lib/libvirt/images/
 root@192.168.0.22's password: 
 agent.iso 
 ~~~
