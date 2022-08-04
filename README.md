@@ -30,26 +30,42 @@ Write something about the workflow describing the image below
 
 Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirements will go away once OpenShift 4.12 goes GA at which time the Agent-based Installer will be GA as well.
 
-So lets go ahead and grab the OpenShift installer source code from Github and checkout the agent-installer branch:
+So lets go ahead and grab the OpenShift installer source code from Github and checkout the specific commit 06703b2ad2fb337efce4c283acdbc5be07370de9:
 
 ~~~bash
 $ git clone https://github.com/openshift/installer
 Cloning into 'installer'...
-remote: Enumerating objects: 204497, done.
-remote: Counting objects: 100% (210/210), done.
-remote: Compressing objects: 100% (130/130), done.
-remote: Total 204497 (delta 99), reused 153 (delta 70), pack-reused 204287
-Receiving objects: 100% (204497/204497), 873.44 MiB | 10.53 MiB/s, done.
-Resolving deltas: 100% (132947/132947), done.
-Updating files: 100% (86883/86883), done.
+remote: Enumerating objects: 213302, done.
+remote: Counting objects: 100% (67/67), done.
+remote: Compressing objects: 100% (55/55), done.
+remote: Total 213302 (delta 22), reused 42 (delta 8), pack-reused 213235
+Receiving objects: 100% (213302/213302), 881.35 MiB | 11.15 MiB/s, done.
+Resolving deltas: 100% (139159/139159), done.
+Updating files: 100% (83711/83711), done.
 
 $ cd installer/
-$ git checkout agent-installer
-Branch 'agent-installer' set up to track remote branch 'agent-installer' from 'origin'.
-Switched to a new branch 'agent-installer'
+$ git checkout 06703b2ad2fb337efce4c283acdbc5be07370de9
+Note: switching to '06703b2ad2fb337efce4c283acdbc5be07370de9'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 06703b2ad Merge pull request #6201 from rwsu/BUG-2114977
 
 $ git branch
-* agent-installer
+* (HEAD detached at 06703b2ad)
   master
 ~~~
 
@@ -73,14 +89,20 @@ $ hack/build.sh
 + make -C terraform all
 make: Entering directory '/home/bschmaus/installer/terraform'
 cd providers/alicloud; \
+if [ -f main.go ]; then path="."; else path=./vendor/`grep _ tools.go|awk '{ print $2 }'|sed 's|"||g'`; fi; \
+go build -ldflags "-s -w" -o ../../bin/linux_amd64/terraform-provider-alicloud "$path"; \
+zip -1j ../../bin/linux_amd64/terraform-provider-alicloud.zip ../../bin/linux_amd64/terraform-provider-alicloud;
+  adding: terraform-provider-alicloud (deflated 81%)
 (...)
+cd terraform; \
+go build -ldflags "-s -w" -o ../bin/linux_amd64/terraform ./vendor/github.com/hashicorp/terraform
 make: Leaving directory '/home/bschmaus/installer/terraform'
 + copy_terraform_to_mirror
 ++ go env GOOS
 ++ go env GOARCH
 + TARGET_OS_ARCH=linux_amd64
 + rm -rf '/home/bschmaus/installer/pkg/terraform/providers/mirror/*/'
-+ find /home/bschmaus/installer/terraform/bin/ -maxdepth 1 -name 'terraform-provider-*.zip' -exec bash -c '
++ find /home/bschmaus/installer/terraform/bin/linux_amd64/ -maxdepth 1 -name 'terraform-provider-*.zip' -exec bash -c '
       providerName="$(basename "$1" | cut -d - -f 3 | cut -d . -f 1)"
       targetOSArch="$2"
       dstDir="${PWD}/pkg/terraform/providers/mirror/openshift/local/$providerName"
@@ -90,7 +112,6 @@ make: Leaving directory '/home/bschmaus/installer/terraform'
     ' shell '{}' linux_amd64 ';'
 Copying alicloud provider to mirror
 Copying aws provider to mirror
-Copying azureprivatedns provider to mirror
 Copying azurerm provider to mirror
 Copying azurestack provider to mirror
 Copying google provider to mirror
@@ -103,38 +124,44 @@ Copying nutanix provider to mirror
 Copying openstack provider to mirror
 Copying ovirt provider to mirror
 Copying random provider to mirror
+Copying time provider to mirror
 Copying vsphere provider to mirror
 Copying vsphereprivate provider to mirror
+Copying azureprivatedns provider to mirror
 + mkdir -p /home/bschmaus/installer/pkg/terraform/providers/mirror/terraform/
-+ cp /home/bschmaus/installer/terraform/bin/terraform /home/bschmaus/installer/pkg/terraform/providers/mirror/terraform/
++ cp /home/bschmaus/installer/terraform/bin/linux_amd64/terraform /home/bschmaus/installer/pkg/terraform/providers/mirror/terraform/
 + MODE=release
 ++ git rev-parse --verify 'HEAD^{commit}'
-+ GIT_COMMIT=d74e210f30edf110764d87c8223a18b8a9952253
++ GIT_COMMIT=06703b2ad2fb337efce4c283acdbc5be07370de9
 ++ git describe --always --abbrev=40 --dirty
-+ GIT_TAG=unreleased-master-6040-gd74e210f30edf110764d87c8223a18b8a9952253
++ GIT_TAG=unreleased-master-6529-g06703b2ad2fb337efce4c283acdbc5be07370de9
 + DEFAULT_ARCH=amd64
 + GOFLAGS=-mod=vendor
-+ LDFLAGS=' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6040-gd74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.Commit=d74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.defaultArch=amd64'
++ LDFLAGS=' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6529-g06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.Commit=06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.defaultArch=amd64'
 + TAGS=
 + OUTPUT=bin/openshift-install
 + export CGO_ENABLED=0
 + CGO_ENABLED=0
 + case "${MODE}" in
-+ LDFLAGS=' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6040-gd74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.Commit=d74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.defaultArch=amd64 -s -w'
++ LDFLAGS=' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6529-g06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.Commit=06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.defaultArch=amd64 -s -w'
 + TAGS=' release'
 + test '' '!=' y
++ GOOS=
++ GOARCH=
 + go generate ./data
 writing assets_vfsdata.go
 + echo ' release'
 + grep -q libvirt
-+ go build -mod=vendor -ldflags ' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6040-gd74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.Commit=d74e210f30edf110764d87c8223a18b8a9952253 -X github.com/openshift/installer/pkg/version.defaultArch=amd64 -s -w' -tags ' release' -o bin/openshift-install ./cmd/openshift-install
++ go build -mod=vendor -ldflags ' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6529-g06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.Commit=06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.defaultArch=amd64 -s -w' -tags ' release' -o bin/openshift-install ./cmd/openshift-install
 ~~~
 
 Now that we have the binary lets go ahead and create a directory that will contain the required manifests we need for our deployment that will get injected into the ISO we build:
 
 ~~~bash
-$ cd ~/
-$ mkdir ~/manifests
+$ pwd
+~/installer
+
+$ mkdir cluster-manifests
 ~~~
 
 With the directory created we can move onto creating the agent cluster install resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the api and ingress vip and the cluster networking.   In my example I will be deploying a 3 node compact cluster which referenced a cluster deployment named kni22:
