@@ -168,7 +168,7 @@ $ pwd
 $ mkdir cluster-manifests
 ~~~
 
-With the directory created we can move onto creating the install configuration resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the api and ingress vip, physical node mac addresses and the cluster networking. In my example I will be deploying a 3 node compact cluster which referenced a cluster deployment named kni22.   We will also define the image content source policy and include our cert for our registry since we are doing a disconnected installation.
+With the directory created we can move onto creating the install configuration resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the API and ingress VIP, physical node MAC addresses and the cluster networking. In my example I will be deploying a 3 node compact cluster which references a cluster deployment named kni22.   We will also define the image content source policy and include our cert for our registry since we are doing a disconnected installation.
 
 ~~~bash
 $ cat << EOF > ./cluster-manifests/install-config.yaml
