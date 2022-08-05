@@ -24,11 +24,11 @@ We have worked with users from different industries and incorporated their feedb
 
 ## Lab Demo Configuration
 
-Throughout the rest of this blog we will be demonstrating how to use the Agent-Based Installer.  While the purpose of the installer is to address baremetal disconnected environments our lab demo configuration will consist of 3 virtual machines on a single KVM Red Hat Enterprise Linux hypervisor.  While they are virtual machines they will still demonstrate the workflow that would be experienced on regular baremetal servers.
+Throughout the rest of this blog we will be demonstrating how to use the Agent-Based Installer.  While the purpose of the installer is to address bare metal disconnected environments our lab demo configuration will consist of 3 virtual machines on a single KVM Red Hat Enterprise Linux hypervisor.  While they are virtual machines they will still demonstrate the workflow that would be experienced on regular bare metal servers.
 
 ## Getting Familiar with Agent-Based OpenShift Installer
 
-Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike the baremetal IPI OpenShift installation there is no need for a provisioning host.  This is because one of the nodes becomes the bootstrap host early in the boot process and runs the assisted service.  The assisted service validates and confirms all hosts checking in meet the requirements and triggers a cluster deployment.   Once the cluster deployment kicks off all the nodes get their RHCOS image written to disk but only the non-bootstrap nodes reboot and begin to instantiate a cluster.  Once they come up then the original bootstrap node reboots and comes up from disk to join the cluster.  At that point the bootstrapping is complete and the cluster comes up just like any other installation method until finalized.
+Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike the bare metal IPI OpenShift installation there is no need for a provisioning host.  This is because one of the nodes becomes the bootstrap host early in the boot process and runs the assisted service.  The assisted service validates and confirms all hosts checking in meet the requirements and triggers a cluster deployment.   Once the cluster deployment kicks off all the nodes get their RHCOS image written to disk but only the non-bootstrap nodes reboot and begin to instantiate a cluster.  Once they come up then the original bootstrap node reboots and comes up from disk to join the cluster.  At that point the bootstrapping is complete and the cluster comes up just like any other installation method until finalized.
 
 <img src="node-lifecycle.png" style="width: 1000px;" border=0/>
 
