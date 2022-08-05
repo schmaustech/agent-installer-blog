@@ -28,6 +28,8 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 <img src="node-lifecycle.png" style="width: 1000px;" border=0/>
 
+## Building the Binary
+
 Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirements will go away once OpenShift 4.12 goes GA at which time the Agent-based Installer will be GA as well.
 
 So lets go ahead and grab the OpenShift installer source code from Github and checkout the specific commit 06703b2ad2fb337efce4c283acdbc5be07370de9:
@@ -154,6 +156,8 @@ writing assets_vfsdata.go
 + grep -q libvirt
 + go build -mod=vendor -ldflags ' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6529-g06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.Commit=06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.defaultArch=amd64 -s -w' -tags ' release' -o bin/openshift-install ./cmd/openshift-install
 ~~~
+
+## Creating the Install-config.yaml and Agent-config.yaml
 
 Now that we have the binary lets go ahead and create a directory that will contain the required manifests we need for our deployment that will get injected into the ISO we build:
 
@@ -352,6 +356,8 @@ agent-config.yaml
 install-config.yaml
 ~~~
 
+## Building the Agent.iso Image
+
 One more step we need to execute before creating our image is to set our image release override to ensure we are dpeloying the version of OpenShift we want to deploy.  In my example my local disconnected registry contains the following OpenShift release 4.11.0-rc.7.  So we will want to set the override to that version by executing the following:
 
 ~~~bash
@@ -387,6 +393,8 @@ auth
 $ ls -1 cluster-manifests/auth/
 kubeconfig
 ~~~
+
+## Staging the Image on Nodes
 
 Since the nodes I will be using to demonstrate this 3 node compact cluster are virtual machines all on the same KVM hypervisor I will go ahead and copy the agent.iso image over to that host:
 
@@ -427,6 +435,8 @@ With the image moved over, I logged into the hypervisor host and ensured each vi
  sda      /var/lib/libvirt/images/asus3-vm3.qcow2
  sdb      /var/lib/libvirt/images/agent.iso
 ~~~
+
+## Running and Watching the Deployment
 
 Now lets go ahead and start the virtual machines all at the same time from the hypervisor host:
 
@@ -560,4 +570,83 @@ service-ca                                 4.11.0-rc.7   True        False      
 storage                                    4.11.0-rc.7   True        False         False      29m     
 ~~~
 
-Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure.  
+## Setting KubeAdmin Password
+
+Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure. Fi step is to create an empty directory called kuberotate:
+
+~~~bash
+$ mkdir ~/kuberotate
+$ cd ~/kuberotate
+~~~
+
+Next lets generate the kubeadmin-rotate.go file with the following source code:
+
+~~~bash
+
+$ cat << EOF > ./kubeadmin-rotate.go 
+package main
+
+import (
+	"fmt"
+	"crypto/rand"
+	"golang.org/x/crypto/bcrypt"
+	b64 "encoding/base64"
+	"math/big"
+)
+
+// generateRandomPasswordHash generates a hash of a random ASCII password
+// 5char-5char-5char-5char
+func generateRandomPasswordHash(length int) (string, string, error) {
+	const (
+		lowerLetters = "abcdefghijkmnopqrstuvwxyz"
+		upperLetters = "ABCDEFGHIJKLMNPQRSTUVWXYZ"
+		digits       = "23456789"
+		all          = lowerLetters + upperLetters + digits
+	)
+	var password string
+	for i := 0; i < length; i++ {
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(all))))
+		if err != nil {
+			return "", "", err
+		}
+		newchar := string(all[n.Int64()])
+		if password == "" {
+			password = newchar
+		}
+		if i < length-1 {
+			n, err = rand.Int(rand.Reader, big.NewInt(int64(len(password)+1)))
+			if err != nil {
+				return "", "",err
+			}
+			j := n.Int64()
+			password = password[0:j] + newchar + password[j:]
+		}
+	}
+	pw := []rune(password)
+	for _, replace := range []int{5, 11, 17} {
+		pw[replace] = '-'
+	}
+	
+	bytes, err := bcrypt.GenerateFromPassword([]byte(string(pw)), bcrypt.DefaultCost)
+	if err != nil {
+		return "", "",err
+	}
+
+	return string(pw), string(bytes), nil
+}
+
+func main() {
+        password, hash, err := generateRandomPasswordHash(23)
+        
+        if err != nil {
+           fmt.Println(err.Error())
+           return
+        }
+	fmt.Printf("Actual Password: %s\n", password)
+	fmt.Printf("Hashed Password: %s\n", hash)
+	fmt.Printf("Data to Change in Secret: %s\n", b64.StdEncoding.EncodeToString([]byte(hash)))
+}
+EOF 
+~~~
+
+
