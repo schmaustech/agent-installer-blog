@@ -30,7 +30,7 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 ## Building the Binary
 
-Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirements will go away once OpenShift 4.12 goes GA at which time the Agent-based Installer will be GA as well.
+Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirements will go away when the Agent-Based Installer becomes Generally Available as part of OpenShift.
 
 So lets go ahead and grab the OpenShift installer source code from Github and checkout the specific commit 06703b2ad2fb337efce4c283acdbc5be07370de9:
 
