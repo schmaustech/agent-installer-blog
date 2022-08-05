@@ -445,7 +445,7 @@ If we switch over to the console of one of the virtual machines using virt-manag
 
 <img src="asus3-vm1-console.png" style="width: 800px;" border=0/>
 
-With the nodes booting we can return to the installer directory where we built the agent image and watch the installation continue.   To do this we need to first export the kubeconfig and then issue the command to wait-for install-complete:
+With the nodes booting we can return to the installer directory where we built the agent image and watch the installation continue.   To do this we need to first export the kubeconfig and then issue the command openshift-install agent with the to wait-for install-complete switch:
 
 ~~~bash
 $ pwd
@@ -453,6 +453,64 @@ $ pwd
 
 $ export KUBECONFIG=/home/bschmaus/installer/cluster-manifests/auth/kubeconfig
 
+$ bin/openshift-install agent wait-for install-complete --dir cluster-manifests
+INFO Waiting for cluster install to initialize. Sleeping for 30 seconds 
+INFO Waiting for cluster install to initialize. Sleeping for 30 seconds 
+INFO Waiting for cluster install to initialize. Sleeping for 30 seconds 
+INFO Checking for validation failures ---------------------------------------------- 
+ERROR Validation failure found for asus3-vm1        category=network label=Belongs to majority connected group message=No connectivity to the majority of hosts in the cluster
+ERROR Validation failure found for asus3-vm1        category=network label=DNS wildcard not configured message=Parse error for domain name resolutions result
+ERROR Validation failure found for asus3-vm1        category=network label=NTP synchronization message=Host couldn't synchronize with any NTP server
+ERROR Validation failure found for asus3-vm2        category=network label=Belongs to majority connected group message=No connectivity to the majority of hosts in the cluster
+ERROR Validation failure found for asus3-vm2        category=network label=DNS wildcard not configured message=Parse error for domain name resolutions result
+ERROR Validation failure found for asus3-vm2        category=network label=NTP synchronization message=Host couldn't synchronize with any NTP server
+ERROR Validation failure found for asus3-vm3        category=network label=Belongs to majority connected group message=No connectivity to the majority of hosts in the cluster
+ERROR Validation failure found for asus3-vm3        category=network label=DNS wildcard not configured message=Parse error for domain name resolutions result
+ERROR Validation failure found for asus3-vm3        category=network label=NTP synchronization message=Host couldn't synchronize with any NTP server
+ERROR Validation failure found for cluster          category=hosts-data label=all-hosts-are-ready-to-install message=The cluster has hosts that are not ready to install.
+INFO Checking for validation failures ---------------------------------------------- 
+ERROR Validation failure found for asus3-vm1        category=network label=Belongs to majority connected group message=No connectivity to the majority of hosts in the cluster
+ERROR Validation failure found for asus3-vm2        category=network label=Belongs to majority connected group message=No connectivity to the majority of hosts in the cluster
+ERROR Validation failure found for asus3-vm3        category=network label=Belongs to majority connected group message=No connectivity to the majority of hosts in the cluster
+ERROR Validation failure found for cluster          category=hosts-data label=all-hosts-are-ready-to-install message=The cluster has hosts that are not ready to install.
+INFO Checking for validation failures ---------------------------------------------- 
+ERROR Validation failure found for cluster          category=hosts-data label=all-hosts-are-ready-to-install message=The cluster has hosts that are not ready to install.
+INFO Pre-installation validations are OK          
+INFO Cluster is ready for install                 
+INFO Host asus3-vm1: updated status from insufficient to known (Host is ready to be installed) 
+INFO Preparing cluster for installation           
+INFO Host asus3-vm3: updated status from known to preparing-for-installation (Host finished successfully to prepare for installation) 
+INFO Host asus3-vm1: New image status quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:b6f2a69fdc1a0844565320fc51316aa79ad6d4661326b30fa606123476c3d9f7. result: success. time: 0.83 seconds; size: 378.98 Megabytes; download rate: 479.70 MBps 
+INFO Host asus3-vm1: updated status from preparing-for-installation to preparing-successful (Host finished successfully to prepare for installation) 
+INFO Cluster installation in progress             
+INFO Host asus3-vm3: updated status from preparing-successful to installing (Installation is in progress) 
+INFO Host: asus3-vm2, reached installation stage Writing image to disk 
+INFO Host: asus3-vm1, reached installation stage Writing image to disk 
+INFO Host: asus3-vm2, reached installation stage Writing image to disk: 24% 
+INFO Host: asus3-vm2, reached installation stage Writing image to disk: 30% 
+INFO Host: asus3-vm3, reached installation stage Writing image to disk: 45% 
+INFO Host: asus3-vm1, reached installation stage Writing image to disk: 43% 
+INFO Host: asus3-vm1, reached installation stage Writing image to disk: 57% 
+INFO Host: asus3-vm1, reached installation stage Writing image to disk: 62% 
+INFO Host: asus3-vm1, reached installation stage Writing image to disk: 72% 
+INFO Host: asus3-vm1, reached installation stage Writing image to disk: 77% 
+INFO Host: asus3-vm1, reached installation stage Writing image to disk: 85% 
+INFO Host: asus3-vm2, reached installation stage Writing image to disk: 100% 
+INFO Host: asus3-vm2, reached installation stage Rebooting 
+INFO Host: asus3-vm1, reached installation stage Waiting for control plane: Waiting for masters to join bootstrap control plane 
+INFO Cluster Kube API Initialized                 
+INFO Host: asus3-vm2, reached installation stage Configuring 
+INFO Host: asus3-vm2, reached installation stage Joined 
+INFO Host: asus3-vm1, reached installation stage Waiting for bootkube 
+INFO Host: asus3-vm3, reached installation stage Done 
+INFO Host: asus3-vm1, reached installation stage Waiting for controller: waiting for controller pod ready event 
+INFO Bootstrap configMap status is complete       
+INFO cluster bootstrap is complete                
+INFO Cluster is installed                         
+INFO Install complete!                            
+INFO To access the cluster as the system:admin user when using 'oc', run 
+INFO     export KUBECONFIG=/home/bschmaus/installer/cluster-manifests/auth/kubeconfig 
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.kni22.schmaustech.com 
 
 
 ~~~
