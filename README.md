@@ -348,7 +348,7 @@ spec:
 EOF
 ~~~
 
-At this point we have now created two configuration file: the install-config.yaml and the agent-config.yaml.  Both of which are under the cluster-manifests directory:
+At this point we have now created two configuration files: the install-config.yaml and the agent-config.yaml.  Both of which are under the cluster-manifests directory:
 
 ~~~bash
 $ ls -1 cluster-manifests/
