@@ -4,9 +4,9 @@
 
 With OpenShift 4.11 we are introducing a pre-release version of the [new agent-based installer for OpenShift](https://github.com/openshift/installer/tree/agent-installer) that we are adding to the official OpenShift installer. With this new <code>agent</code> subcommand, installing clusters on premise has never been so easy, while allowing as many types of designs as possible. Our aim is to provide the flexibility of [user-provided infrastructure (UPI)](https://docs.openshift.com/container-platform/4.11/installing/installing_bare_metal/installing-bare-metal.html) installs with the ease of use that the [OpenShift Assisted Installer](https://docs.openshift.com/container-platform/4.11/installing/installing_on_prem_assisted/installing-on-prem-assisted.html) offers for connected environments, while in fully disconnected or air-gapped environments. 
 
-We have worked with users from different industries and incorporated their feedback and use cases in its design. To do this we are combining existing technologies and experience coming from the Assisted Installer, the [installer-provisioned infrastructure (IPI)](https://docs.openshift.com/container-platform/4.11/installing/installing_bare_metal_ipi/ipi-install-overview.html) among others.
+We have worked with users from different industries and incorporated their feedback and use cases in its design. To do this we are combining existing technologies and experience coming from the Assisted Installer and the [installer-provisioned infrastructure (IPI)](https://docs.openshift.com/container-platform/4.11/installing/installing_bare_metal_ipi/ipi-install-overview.html), among others.
 
-## Use Cases We are Addressing
+## Use Cases We Are Addressing
 
 * Quickly deploy isolated OpenShift clusters on premise of any topology.
 * Install a cluster zero with OpenShift management components such as Red Hat Advanced Cluster Management for Kubernetes (ACM), GitOps, Quay, and components to support your other clusters.
@@ -14,7 +14,7 @@ We have worked with users from different industries and incorporated their feedb
 
 ## Features Included and/or In Progress
 
-* Create bootable images with openshift-install to deploy your clusters.
+* Create bootable images with <code>openshift-install</code> command to deploy your clusters.
 * In-place bootstrap, no extra node required.
 * Works in fully disconnected deployments.
 * Works with a mirrored local registry.
