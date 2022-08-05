@@ -358,7 +358,7 @@ install-config.yaml
 
 ## Building the Agent.iso Image
 
-One more step we need to execute before creating our image is to set our image release override to ensure we are dpeloying the version of OpenShift we want to deploy.  In my example my local disconnected registry contains the following OpenShift release 4.11.0-rc.7.  So we will want to set the override to that version by executing the following:
+One more step we need to execute before creating our image is to set our image release override to ensure we are deploying the version of OpenShift we want to deploy.  In my example my local disconnected registry contains the following OpenShift release 4.11.0-rc.7.  So we will want to set the override to that version by executing the following:
 
 ~~~bash
 export VERSION="4.11.0-rc.7"
