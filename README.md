@@ -521,8 +521,6 @@ INFO Install complete!
 INFO To access the cluster as the system:admin user when using 'oc', run 
 INFO     export KUBECONFIG=/home/bschmaus/installer/cluster-manifests/auth/kubeconfig 
 INFO Access the OpenShift web-console here: https://console-openshift-console.apps.kni22.schmaustech.com 
-
-
 ~~~
 
 Once the cluster installation has completed we can run a few commands to validate that indeed the cluster is up and operational:
@@ -572,7 +570,7 @@ storage                                    4.11.0-rc.7   True        False      
 
 ## Setting KubeAdmin Password
 
-Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure. Fi step is to create an empty directory called kuberotate:
+Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure. Ensure that golang is installed before procceeding.  Then start with creating an empty directory called kuberotate:
 
 ~~~bash
 $ mkdir ~/kuberotate
@@ -582,7 +580,6 @@ $ cd ~/kuberotate
 Next lets generate the kubeadmin-rotate.go file with the following source code:
 
 ~~~bash
-
 $ cat << EOF > ./kubeadmin-rotate.go 
 package main
 
@@ -649,4 +646,42 @@ func main() {
 EOF 
 ~~~
 
+Next lets go ahead and initialize our go project with the go mod init command:
 
+~~~bash
+$ go mod init kubeadmin-rotate.go 
+go: creating new go.mod: module kubeadmin-rotate.go
+go: to add module requirements and sums:
+	go mod tidy
+~~~
+
+With the project initialized lets go ahead and pull in the module dependencies by executing a go mod tidy which will pull in the bcrypt module:
+
+~~~bash
+$ go mod tidy
+go: finding module for package golang.org/x/crypto/bcrypt
+go: downloading golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+go: found golang.org/x/crypto/bcrypt in golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+~~~
+
+And finally since I just want to run the program instead of compile it I will just run a go run kubeadmin-rotate.go which will print out the password, a hashed password and a base64 encoded version of the hashed password:
+
+~~~bash
+$ go run kubeadmin-rotate.go
+Actual Password: XiRng-TKIRI-cFTgu-IVPAZ
+Hashed Password: $2a$10$JCjJ85I47HgNYsJku6JrZe.b9ds40z6URdoDKUpBfC9sNAoeZN3mm
+Data to Change in Secret: JDJhJDEwJEpDako4NUk0N0hnTllzSmt1NkpyWmUuYjlkczQwejZVUmRvREtVcEJmQzlzTkFvZVpOM21t
+~~~
+
+The last step is to patch the kubeadmin secret with the hashed password that was base64 encoded from the Data to Change in Secret line above:
+
+~~~bash
+$ oc patch secret -n kube-system kubeadmin --type json -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "JDJhJDEwJEpDako4NUk0N0hnTllzSmt1NkpyWmUuYjlkczQwejZVUmRvREtVcEJmQzlzTkFvZVpOM21t"}]' 
+secret/kubeadmin patched
+~~~
+
+And now we should be able to login to the OpenShift Console with our newly reset kubeadmin password.
+
+## Final Thoughts 
+
+Hopefully this blog provides an early glimpse into the the ease of installation when using the Agent-Based Installer.  In future releases when it goes GA we plan to provide additional improvements and enhancements.
