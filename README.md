@@ -455,7 +455,7 @@ If we switch over to the console of one of the virtual machines using virt-manag
 
 <img src="asus3-vm1-console.png" style="width: 800px;" border=0/>
 
-With the nodes booting we can return to the installer directory where we built the agent image and watch the installation continue. To do this we need to first export the <code>kubeconfig</code> file and then issue the command <code>openshift-install agent</code> with the to <code>wait-for install-complete</code> switch:
+With the nodes booting we can return to the installer directory where we built the agent image and watch the installation continue. To do this we need to first export the <code>kubeconfig</code> file and then issue the command <code>openshift-install agent</code> with the <code>wait-for install-complete</code> switch:
 
 ~~~bash
 $ pwd
