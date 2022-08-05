@@ -684,4 +684,4 @@ And now we should be able to login to the OpenShift Console with our newly reset
 
 ## Final Thoughts 
 
-Hopefully this blog provides an early glimpse into the the ease of installation when using the Agent-Based Installer.  In future releases when it goes GA we plan to provide additional improvements and enhancements.
+Hopefully this blog provides an early glimpse into the the ease of installation of disconnected clusters on bare metal when using the new Agent-Based Installer.  In future releases when it goes GA we plan to provide additional improvements and enhancements, such as a graphical user interface.
