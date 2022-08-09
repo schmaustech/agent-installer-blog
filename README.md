@@ -36,7 +36,7 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirement will go away when the Agent-Based Installer becomes Generally Available as part of OpenShift.
 
-So lets go ahead and grab the OpenShift installer source code from Github and checkout the specific commit 06703b2ad2fb337efce4c283acdbc5be07370de9:
+Before we begin lets ensure we are using RHEL8 or RHEL9 as our location to build the binary.  Further we will want to ensure that mkisofs and nmstatectl are installed on the system.   Now lets go grab the OpenShift installer source code from Github and checkout the specific commit 06703b2ad2fb337efce4c283acdbc5be07370de9:
 
 ~~~bash
 $ git clone https://github.com/openshift/installer
