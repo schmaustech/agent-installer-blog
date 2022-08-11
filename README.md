@@ -163,7 +163,7 @@ writing assets_vfsdata.go
 
 ## Creating the Install-config.yaml and Agent-config.yaml
 
-Now that we have the binary lets go ahead and create a directory that will contain the required manifests we need for our deployment that will get injected into the ISO we build:
+Now that we have the binary ready at <code>installer/bin/openshift-install</code> lets go ahead and create a directory that will contain the required manifests we need for our deployment that will get injected into the ISO we build:
 
 ~~~bash
 $ pwd
