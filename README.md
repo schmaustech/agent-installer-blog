@@ -22,9 +22,16 @@ We have worked with users from different industries and incorporated their feedb
 * Can be automated with third party tools.
 * User-friendly interface based on the Assisted Installer.
 
+## Limitations/Notes
+
+ * errors in wait-for saying can be ignored
+ * At least one of node needs to have static IP configuration: networkConfig or ZTP nmstateconfig
+ * Conflict when both networkConfig and nmstateconfig are provided for a node
+ * SNO is not completing when external api-int/ingress DNS records are missing
+
 ## Lab Demo Configuration
 
-Throughout the rest of this blog we will be demonstrating how to use the Agent-Based Installer.  While the purpose of the installer is to address bare metal disconnected environments our lab demo configuration will consist of 3 virtual machines on a single KVM Red Hat Enterprise Linux hypervisor.  While they are virtual machines they will still demonstrate the workflow that would be experienced on regular bare metal servers.
+Throughout the rest of this blog we will be demonstrating how to use the Agent-Based Installer.  While the purpose of the installer is to address bare metal [disconnected environments](https://docs.openshift.com/container-platform/4.11/installing/disconnected_install/installing-mirroring-disconnected.htm) our lab demo configuration will consist of 3 virtual machines on a single KVM Red Hat Enterprise Linux hypervisor.  While they are virtual machines they will still demonstrate the workflow that would be experienced on regular bare metal servers.
 
 ## Getting Familiar with Agent-Based OpenShift Installer
 
