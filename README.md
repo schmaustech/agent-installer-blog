@@ -43,7 +43,7 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirement will go away when the Agent-Based Installer becomes Generally Available as part of OpenShift.
 
-Before we begin lets ensure we are using RHEL8 or RHEL9 on x86 architecture as our location to build the binary and have installed the packages <code>go</code>, <code>make</code> and <code>zip</code>.  Further, we will want to ensure that <code>mkisofs</code> and <code>nmstatectl</code> are installed on the system.  We also need about 5G of available disk space for the source code, compiled binary and generated images. Now lets go grab the OpenShift installer source code from Github and checkout the specific commit 06703b2ad2fb337efce4c283acdbc5be07370de9:
+Before we begin lets ensure we are using RHEL8 or RHEL9 on x86 architecture as our location to build the binary and have installed the packages <code>go</code>, <code>make</code> and <code>zip</code>.  Further, we will want to ensure that <code>mkisofs</code> and <code>nmstatectl</code> are installed on the system.  We also need about 5G of available disk space for the source code, compiled binary and generated images. Now lets go grab the OpenShift installer source code from Github and checkout the specific tag agent-based-installer-4.11-developer-preview:
 
 ~~~bash
 $ git clone https://github.com/openshift/installer
@@ -57,8 +57,8 @@ Resolving deltas: 100% (139159/139159), done.
 Updating files: 100% (83711/83711), done.
 
 $ cd installer/
-$ git checkout 06703b2ad2fb337efce4c283acdbc5be07370de9
-Note: switching to '06703b2ad2fb337efce4c283acdbc5be07370de9'.
+$ git checkout agent-based-installer-4.11-developer-preview
+Note: switching to 'agent-based-installer-4.11-developer-preview'.
 
 You are in 'detached HEAD' state. You can look around, make experimental
 changes and commit them, and you can discard any commits you make in this
@@ -372,7 +372,7 @@ install-config.yaml
 One more step we need to execute before creating our image is to set our image release override to ensure we are deploying the version of OpenShift we want to deploy.  In my example my local disconnected registry contains the following OpenShift release 4.11.0-rc.7.  So we will want to set the override to that version by executing the following:
 
 ~~~bash
-export VERSION="4.11.0-rc.7"
+export VERSION="4.11.0"
 export OPENSHIFT_RELEASE_IMAGE="registry.svc.ci.openshift.org/ocp/release:$VERSION"
 export LOCAL_REG='provisioning.schmaustech.com:5000'
 export export LOCAL_REPO='ocp4/openshift4'
@@ -545,38 +545,38 @@ asus3-vm3   Ready    master,worker   30m   v1.24.0+9546431
 
 $ oc get co
 NAME                                       VERSION       AVAILABLE   PROGRESSING   DEGRADED   SINCE   MESSAGE
-authentication                             4.11.0-rc.7   True        False         False      4m38s   
-baremetal                                  4.11.0-rc.7   True        False         False      28m     
-cloud-controller-manager                   4.11.0-rc.7   True        False         False      30m     
-cloud-credential                           4.11.0-rc.7   True        False         False      33m     
-cluster-autoscaler                         4.11.0-rc.7   True        False         False      28m     
-config-operator                            4.11.0-rc.7   True        False         False      29m     
-console                                    4.11.0-rc.7   True        False         False      11m     
-csi-snapshot-controller                    4.11.0-rc.7   True        False         False      29m     
-dns                                        4.11.0-rc.7   True        False         False      29m     
-etcd                                       4.11.0-rc.7   True        False         False      27m     
-image-registry                             4.11.0-rc.7   True        False         False      14m     
-ingress                                    4.11.0-rc.7   True        False         False      20m     
-insights                                   4.11.0-rc.7   True        False         False      52s     
-kube-apiserver                             4.11.0-rc.7   True        False         False      25m     
-kube-controller-manager                    4.11.0-rc.7   True        False         False      26m     
-kube-scheduler                             4.11.0-rc.7   True        False         False      25m     
-kube-storage-version-migrator              4.11.0-rc.7   True        False         False      29m     
-machine-api                                4.11.0-rc.7   True        False         False      25m     
-machine-approver                           4.11.0-rc.7   True        False         False      28m     
-machine-config                             4.11.0-rc.7   True        False         False      28m     
-marketplace                                4.11.0-rc.7   True        False         False      29m     
-monitoring                                 4.11.0-rc.7   True        False         False      13m     
-network                                    4.11.0-rc.7   True        False         False      30m     
-node-tuning                                4.11.0-rc.7   True        False         False      28m     
-openshift-apiserver                        4.11.0-rc.7   True        False         False      14m     
-openshift-controller-manager               4.11.0-rc.7   True        False         False      25m     
-openshift-samples                          4.11.0-rc.7   True        False         False      20m     
-operator-lifecycle-manager                 4.11.0-rc.7   True        False         False      29m     
-operator-lifecycle-manager-catalog         4.11.0-rc.7   True        False         False      29m     
-operator-lifecycle-manager-packageserver   4.11.0-rc.7   True        False         False      23m     
-service-ca                                 4.11.0-rc.7   True        False         False      29m     
-storage                                    4.11.0-rc.7   True        False         False      29m     
+authentication                             4.11.0        True        False         False      4m38s   
+baremetal                                  4.11.0        True        False         False      28m     
+cloud-controller-manager                   4.11.0        True        False         False      30m     
+cloud-credential                           4.11.0        True        False         False      33m     
+cluster-autoscaler                         4.11.0        True        False         False      28m     
+config-operator                            4.11.0        True        False         False      29m     
+console                                    4.11.0        True        False         False      11m     
+csi-snapshot-controller                    4.11.0        True        False         False      29m     
+dns                                        4.11.0        True        False         False      29m     
+etcd                                       4.11.0        True        False         False      27m     
+image-registry                             4.11.0        True        False         False      14m     
+ingress                                    4.11.0        True        False         False      20m     
+insights                                   4.11.0        True        False         False      52s     
+kube-apiserver                             4.11.0        True        False         False      25m     
+kube-controller-manager                    4.11.0        True        False         False      26m     
+kube-scheduler                             4.11.0        True        False         False      25m     
+kube-storage-version-migrator              4.11.0        True        False         False      29m     
+machine-api                                4.11.0        True        False         False      25m     
+machine-approver                           4.11.0        True        False         False      28m     
+machine-config                             4.11.0        True        False         False      28m     
+marketplace                                4.11.0        True        False         False      29m     
+monitoring                                 4.11.0        True        False         False      13m     
+network                                    4.11.0        True        False         False      30m     
+node-tuning                                4.11.0        True        False         False      28m     
+openshift-apiserver                        4.11.0        True        False         False      14m     
+openshift-controller-manager               4.11.0        True        False         False      25m     
+openshift-samples                          4.11.0        True        False         False      20m     
+operator-lifecycle-manager                 4.11.0        True        False         False      29m     
+operator-lifecycle-manager-catalog         4.11.0        True        False         False      29m     
+operator-lifecycle-manager-packageserver   4.11.0        True        False         False      23m     
+service-ca                                 4.11.0        True        False         False      29m     
+storage                                    4.11.0        True        False         False      29m     
 ~~~
 
 ## Setting KubeAdmin Password
