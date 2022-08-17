@@ -378,6 +378,12 @@ export LOCAL_REPO='ocp4/openshift4'
 export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=${LOCAL_REG}/${LOCAL_REPO}:${VERSION}
 ~~~
 
+I should note here that if one did not have a disconnected installation then the image override should be set to the following:
+
+~~~bash
+export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE="quay.io/openshift-release-dev/ocp-release:4.11.0-x86_64"
+~~~
+
 We are now ready to use the Openshift install binary we compiled earlier with the Agent Installer code to generate our ephemeral OpenShift ISO.   We do this by issuing the following command which introduces the agent option.  This in turn will read in the manifest details we generated and download the corresponding RHCOS image and then inject our details into the image writing out a file called agent.iso:
 
 ~~~bash
