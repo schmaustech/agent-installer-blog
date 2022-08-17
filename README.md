@@ -373,9 +373,8 @@ One more step we need to execute before creating our image is to set our image r
 
 ~~~bash
 export VERSION="4.11.0"
-export OPENSHIFT_RELEASE_IMAGE="registry.svc.ci.openshift.org/ocp/release:$VERSION"
 export LOCAL_REG='provisioning.schmaustech.com:5000'
-export export LOCAL_REPO='ocp4/openshift4'
+export LOCAL_REPO='ocp4/openshift4'
 export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=${LOCAL_REG}/${LOCAL_REPO}:${VERSION}
 ~~~
 
