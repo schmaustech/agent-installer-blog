@@ -228,7 +228,7 @@ imageContentSources:
   source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
 - mirrors:
   - provisioning.schmaustech.com:5000/ocp4/openshift4
-  source: registry.svc.ci.openshift.org/ocp/release
+  source: quay.io/openshift-release-dev/ocp-release
 additionalTrustBundle: |
   -----BEGIN CERTIFICATE-----
   MIIGKDCCBBCgAwIBAgIUVu+F6PrAXwxVfPs4D0KQA3+50y4wDQYJKoZIhvcNAQEL
