@@ -272,90 +272,89 @@ The next configuration file we need to create is the agent configuration resourc
 
 ~~~bash
 $ cat << EOF > ./cluster-manifests/agent-config.yaml
-kind: AgentConfig
+apiVersion: v1alpha1
 metadata:
   name: kni22
-spec:
-  rendezvousIP: 192.168.0.116
-  hosts:
-    - hostname: asus3-vm1
+rendezvousIP: 192.168.0.116
+hosts:
+  - hostname: asus3-vm1
+    interfaces:
+     - name: enp2s0
+       macAddress: 52:54:00:e7:05:72
+    networkConfig:
       interfaces:
-       - name: enp2s0
-         macAddress: 52:54:00:e7:05:72
-      networkConfig:
-        interfaces:
-          - name: enp2s0
-            type: ethernet
-            state: up
-            mac-address: 52:54:00:e7:05:72
-            ipv4:
-              enabled: true
-              address:
-                - ip: 192.168.0.116
-                  prefix-length: 23
-              dhcp: false
-        dns-resolver:
-          config:
-            server:
-              - 192.168.0.10
-        routes:
-          config:
-            - destination: 0.0.0.0/0
-              next-hop-address: 192.168.0.1
-              next-hop-interface: enp2s0
-              table-id: 254
-    - hostname: asus3-vm2
+        - name: enp2s0
+          type: ethernet
+          state: up
+          mac-address: 52:54:00:e7:05:72
+          ipv4:
+            enabled: true
+            address:
+              - ip: 192.168.0.116
+                prefix-length: 23
+            dhcp: false
+      dns-resolver:
+        config:
+          server:
+            - 192.168.0.10
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 192.168.0.1
+            next-hop-interface: enp2s0
+            table-id: 254
+  - hostname: asus3-vm2
+    interfaces:
+     - name: enp2s0
+       macAddress: 52:54:00:95:fd:f3
+    networkConfig:
       interfaces:
-       - name: enp2s0
-         macAddress: 52:54:00:95:fd:f3
-      networkConfig:
-        interfaces:
-          - name: enp2s0
-            type: ethernet
-            state: up
-            mac-address: 52:54:00:95:fd:f3
-            ipv4:
-              enabled: true
-              address:
-                - ip: 192.168.0.117
-                  prefix-length: 23
-              dhcp: false
-        dns-resolver:
-          config:
-            server:
-              - 192.168.0.10
-        routes:
-          config:
-            - destination: 0.0.0.0/0
-              next-hop-address: 192.168.0.1
-              next-hop-interface: enp2s0
-              table-id: 254
-    - hostname: asus3-vm3
+        - name: enp2s0
+          type: ethernet
+          state: up
+          mac-address: 52:54:00:95:fd:f3
+          ipv4:
+            enabled: true
+            address:
+              - ip: 192.168.0.117
+                prefix-length: 23
+            dhcp: false
+      dns-resolver:
+        config:
+          server:
+            - 192.168.0.10
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 192.168.0.1
+            next-hop-interface: enp2s0
+            table-id: 254
+  - hostname: asus3-vm3
+    interfaces:
+     - name: enp2s0
+       macAddress: 52:54:00:e8:b9:18
+    networkConfig:
       interfaces:
-       - name: enp2s0
-         macAddress: 52:54:00:e8:b9:18
-      networkConfig:
-        interfaces:
-          - name: enp2s0
-            type: ethernet
-            state: up
-            mac-address: 52:54:00:e8:b9:18
-            ipv4:
-              enabled: true
-              address:
-                - ip: 192.168.0.118
-                  prefix-length: 23
-              dhcp: false
-        dns-resolver:
-          config:
-            server:
-              - 192.168.0.10
-        routes:
-          config:
-            - destination: 0.0.0.0/0
-              next-hop-address: 192.168.0.1
-              next-hop-interface: enp2s0
-              table-id: 254
+        - name: enp2s0
+          type: ethernet
+          state: up
+          mac-address: 52:54:00:e8:b9:18
+          ipv4:
+            enabled: true
+            address:
+              - ip: 192.168.0.118
+                prefix-length: 23
+            dhcp: false
+      dns-resolver:
+        config:
+          server:
+            - 192.168.0.10
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: 192.168.0.1
+            next-hop-interface: enp2s0
+            table-id: 254
 EOF
 ~~~
 
