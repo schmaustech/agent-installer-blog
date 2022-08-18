@@ -586,114 +586,17 @@ storage                                    4.11.0        True        False      
 
 ## Setting KubeAdmin Password
 
-Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure. Ensure that golang is installed before procceeding.  Then start with creating an empty directory called kuberotate:
+Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure which will generate a password, set it in kube-system and then write out the password in auth/kubeadmin/password all in one line: 
 
 ~~~bash
-$ mkdir ~/kuberotate
-$ cd ~/kuberotate
-~~~
-
-Next lets generate the kubeadmin-rotate.go file with the following source code:
-
-~~~bash
-$ cat << EOF > ./kubeadmin-rotate.go 
-package main
-
-import (
-	"fmt"
-	"crypto/rand"
-	"golang.org/x/crypto/bcrypt"
-	b64 "encoding/base64"
-	"math/big"
-)
-
-// generateRandomPasswordHash generates a hash of a random ASCII password
-// 5char-5char-5char-5char
-func generateRandomPasswordHash(length int) (string, string, error) {
-	const (
-		lowerLetters = "abcdefghijkmnopqrstuvwxyz"
-		upperLetters = "ABCDEFGHIJKLMNPQRSTUVWXYZ"
-		digits       = "23456789"
-		all          = lowerLetters + upperLetters + digits
-	)
-	var password string
-	for i := 0; i < length; i++ {
-		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(all))))
-		if err != nil {
-			return "", "", err
-		}
-		newchar := string(all[n.Int64()])
-		if password == "" {
-			password = newchar
-		}
-		if i < length-1 {
-			n, err = rand.Int(rand.Reader, big.NewInt(int64(len(password)+1)))
-			if err != nil {
-				return "", "",err
-			}
-			j := n.Int64()
-			password = password[0:j] + newchar + password[j:]
-		}
-	}
-	pw := []rune(password)
-	for _, replace := range []int{5, 11, 17} {
-		pw[replace] = '-'
-	}
-	
-	bytes, err := bcrypt.GenerateFromPassword([]byte(string(pw)), bcrypt.DefaultCost)
-	if err != nil {
-		return "", "",err
-	}
-
-	return string(pw), string(bytes), nil
-}
-
-func main() {
-        password, hash, err := generateRandomPasswordHash(23)
-        
-        if err != nil {
-           fmt.Println(err.Error())
-           return
-        }
-	fmt.Printf("Actual Password: %s\n", password)
-	fmt.Printf("Hashed Password: %s\n", hash)
-	fmt.Printf("Data to Change in Secret: %s\n", b64.StdEncoding.EncodeToString([]byte(hash)))
-}
-EOF 
-~~~
-
-Next lets go ahead and initialize our go project with the go mod init command:
-
-~~~bash
-$ go mod init kubeadmin-rotate.go 
-go: creating new go.mod: module kubeadmin-rotate.go
-go: to add module requirements and sums:
-	go mod tidy
-~~~
-
-With the project initialized lets go ahead and pull in the module dependencies by executing a go mod tidy which will pull in the bcrypt module:
-
-~~~bash
-$ go mod tidy
-go: finding module for package golang.org/x/crypto/bcrypt
-go: downloading golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
-go: found golang.org/x/crypto/bcrypt in golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
-~~~
-
-And finally since I just want to run the program instead of compile it I will just run a go run kubeadmin-rotate.go which will print out the password, a hashed password and a base64 encoded version of the hashed password:
-
-~~~bash
-$ go run kubeadmin-rotate.go
-Actual Password: XiRng-TKIRI-cFTgu-IVPAZ
-Hashed Password: $2a$10$JCjJ85I47HgNYsJku6JrZe.b9ds40z6URdoDKUpBfC9sNAoeZN3mm
-Data to Change in Secret: JDJhJDEwJEpDako4NUk0N0hnTllzSmt1NkpyWmUuYjlkczQwejZVUmRvREtVcEJmQzlzTkFvZVpOM21t
-~~~
-
-The last step is to patch the kubeadmin secret with the hashed password that was base64 encoded from the Data to Change in Secret line above:
-
-~~~bash
-$ oc patch secret -n kube-system kubeadmin --type json -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "JDJhJDEwJEpDako4NUk0N0hnTllzSmt1NkpyWmUuYjlkczQwejZVUmRvREtVcEJmQzlzTkFvZVpOM21t"}]' 
+$ oc patch secret -n kube-system kubeadmin --type json -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'"$(openssl rand -base64 18 | tee auth/kubeadmin-password | htpasswd -nBi -C 10 "" | cut -d: -f2 | base64 -w 0 -)"'"}]'
 secret/kubeadmin patched
+
+$ ls -l auth/kubeadmin-password 
+-rw-r-----. 1 bschmaus bschmaus 25 Aug 18 10:50 auth/kubeadmin-password
+
+$ cat auth/kubeadmin-password
+VdCOu3+DVfE3J2jurERXFxf1
 ~~~
 
 And now we should be able to login to the OpenShift Console with our newly reset kubeadmin password.
