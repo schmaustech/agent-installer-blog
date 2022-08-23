@@ -157,7 +157,7 @@ $ pwd
 $ mkdir kni-22
 ~~~
 
-This creates the directory <code>installer/kni-22</code>. With the directory created we can move onto creating the install configuration resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the API and ingress VIP, physical node MAC addresses and the cluster networking. In my example I will be deploying a 3 node compact cluster which references a cluster deployment named kni22.   We will also define the image content source policy and include our cert for our registry since we are doing a disconnected installation.
+This creates the directory <code>installer/kni-22</code>. With the directory created we can move onto creating the install configuration resource file.  This file specifies the cluster's configuration such as number of control plane and/or worker nodes, the API and ingress VIP, physical node MAC addresses and the cluster networking. In my example I will be deploying a 3 node compact cluster named kni22.   We will also define the image content source policy and include our cert for our registry since we are doing a disconnected installation.
 
 ~~~bash
 $ cat << EOF > ./kni-22/install-config.yaml
@@ -246,7 +246,7 @@ additionalTrustBundle: |
 EOF
 ~~~
 
-The next configuration file we need to create is the agent configuration resource file.   This file will contain the details of the actual hosts in relation to their networking configuration.   Looking close we can see that for each host we define the interfac, mac address, ipaddress if static and a DNS resolver and routes.   The configuration is very similar to a NMState configuration.  However one item that is a bit different is the rendezvousIP address.   This is the ipaddress of the host that will become the temporary bootstrap node while the cluster is installing.  This ipaddress shoule match one of the other nodes whether they are using a static ipaddress or a dhcp reservation ipaddress:
+The next configuration file we need to create is the agent configuration resource file.   This file will contain the details of the actual hosts in relation to their networking configuration.   Looking close we can see that for each host we define the interface, mac address, ipaddress if static and a DNS resolver and routes.   The configuration is very similar to a NMState configuration.  However one item that is a bit different is the rendezvousIP address.   This is the IP address of the host that will become the temporary bootstrap node while the cluster is installing.  This IP address should match one of the nodes, whether they are using a static IP address or a DHCP reservation IP address:
 
 ~~~bash
 $ cat << EOF > ./kni-22/agent-config.yaml
