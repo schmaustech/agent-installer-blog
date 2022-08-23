@@ -43,7 +43,7 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirement will go away when the Agent-Based Installer becomes Generally Available as part of OpenShift.
 
-Before we begin lets ensure we are using RHEL8 or RHEL9 on x86 architecture as our location to build the binary and have installed the packages <code>go</code>, <code>make</code> and <code>zip</code>.  Further, we will want to ensure that <code>nmstatectl</code> 1.x is installed on the system.  We also need about 5G of available disk space for the source code, compiled binary and generated images. Now lets go grab the OpenShift installer source code from Github and checkout the specific tag agent-based-installer-4.11-developer-preview:
+Before we begin lets ensure we are using RHEL8 or RHEL9 on x86 architecture as our location to build the binary and have installed the packages <code>go</code>, <code>make</code> and <code>zip</code>.  Further, we will want to ensure that <code>nmstatectl</code> 1.x is installed on the system.  We also need about 5G of available disk space for the source code, compiled binary and generated images. Now lets go grab the OpenShift installer source code from Github and checkout the branch agent-installer:
 
 ~~~bash
 $ git clone https://github.com/openshift/installer
@@ -57,29 +57,7 @@ Resolving deltas: 100% (139159/139159), done.
 Updating files: 100% (83711/83711), done.
 
 $ cd installer/
-$ git checkout agent-based-installer-4.11-developer-preview
-Note: switching to 'agent-based-installer-4.11-developer-preview'.
-
-You are in 'detached HEAD' state. You can look around, make experimental
-changes and commit them, and you can discard any commits you make in this
-state without impacting any branches by switching back to a branch.
-
-If you want to create a new branch to retain commits you create, you may
-do so (now or later) by using -c with the switch command. Example:
-
-  git switch -c <new-branch-name>
-
-Or undo this operation with:
-
-  git switch -
-
-Turn off this advice by setting config variable advice.detachedHead to false
-
-HEAD is now at 06703b2ad Merge pull request #6201 from rwsu/BUG-2114977
-
-$ git branch
-* (HEAD detached at 06703b2ad)
-  master
+$ git checkout agent-installer
 ~~~
 
 Once we have the source code checked out we need to go ahead and build the the OpenShift install binary:
