@@ -176,13 +176,13 @@ Now that we have the binary ready at <code>installer/bin/openshift-install</code
 $ pwd
 ~/installer
 
-$ mkdir cluster-manifests
+$ mkdir kni-22
 ~~~
 
-This creates the directory <code>installer/cluster-manifests</code>. With the directory created we can move onto creating the install configuration resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the API and ingress VIP, physical node MAC addresses and the cluster networking. In my example I will be deploying a 3 node compact cluster which references a cluster deployment named kni22.   We will also define the image content source policy and include our cert for our registry since we are doing a disconnected installation.
+This creates the directory <code>installer/kni-22</code>. With the directory created we can move onto creating the install configuration resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the API and ingress VIP, physical node MAC addresses and the cluster networking. In my example I will be deploying a 3 node compact cluster which references a cluster deployment named kni22.   We will also define the image content source policy and include our cert for our registry since we are doing a disconnected installation.
 
 ~~~bash
-$ cat << EOF > ./cluster-manifests/install-config.yaml
+$ cat << EOF > ./kni-22/install-config.yaml
 apiVersion: v1
 baseDomain: schmaustech.com
 compute:
@@ -271,7 +271,7 @@ EOF
 The next configuration file we need to create is the agent configuration resource file.   This file will contain the details of the actual hosts in relation to their networking configuration.   Looking close we can see that for each host we define the interfac, mac address, ipaddress if static and a DNS resolver and routes.   The configuration is very similar to a NMState configuration.  However one item that is a bit different is the rendezvousIP address.   This is the ipaddress of the host that will become the temporary bootstrap node while the cluster is installing.  This ipaddress shoule match one of the other nodes whether they are using a static ipaddress or a dhcp reservation ipaddress:
 
 ~~~bash
-$ cat << EOF > ./cluster-manifests/agent-config.yaml
+$ cat << EOF > ./kni-22/agent-config.yaml
 apiVersion: v1alpha1
 metadata:
   name: kni22
@@ -358,10 +358,10 @@ hosts:
 EOF
 ~~~
 
-At this point we have now created two configuration files: the install-config.yaml and the agent-config.yaml.  Both of which are under the cluster-manifests directory:
+At this point we have now created two configuration files: the install-config.yaml and the agent-config.yaml.  Both of which are under the kni-22 directory:
 
 ~~~bash
-$ ls -1 cluster-manifests/
+$ ls -1 kni-22/
 agent-config.yaml
 install-config.yaml
 ~~~
@@ -386,7 +386,7 @@ export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE="quay.io/openshift-release-dev/o
 We are now ready to use the Openshift install binary we compiled earlier with the Agent Installer code to generate our ephemeral OpenShift ISO.   We do this by issuing the following command which introduces the agent option.  This in turn will read in the manifest details we generated and download the corresponding RHCOS image and then inject our details into the image writing out a file called agent.iso:
 
 ~~~bash
-$ bin/openshift-install agent create image --log-level debug --dir cluster-manifests
+$ bin/openshift-install agent create image --log-level debug --dir kni-22
 WARNING Found override for release image. Please be warned, this is not advised 
 WARNING Found override for release image. Please be warned, this is not advised 
 INFO[0000] Start configuring static network for 3 hosts  pkg=manifests
@@ -402,10 +402,10 @@ INFO Consuming Agent Config from target directory
 Once the agent create image command completes we are left with a agent.iso image and an auth directory that containers kubeconfig:
 
 ~~~bash
-$ ls -1 cluster-manifests/
+$ ls -1 kni-22/
 agent.iso
 auth
-$ ls -1 cluster-manifests/auth/
+$ ls -1 kni-22/auth/
 kubeconfig
 ~~~
 
@@ -414,7 +414,7 @@ kubeconfig
 Since the nodes I will be using to demonstrate this 3 node compact cluster are virtual machines all on the same KVM hypervisor I will go ahead and copy the agent.iso image over to that host:
 
 ~~~bash
-$ scp ./cluster-manifests/agent.iso root@192.168.0.22:/var/lib/libvirt/images/
+$ scp ./kni-22/agent.iso root@192.168.0.22:/var/lib/libvirt/images/
 root@192.168.0.22's password: 
 agent.iso 
 ~~~
@@ -476,9 +476,9 @@ With the nodes booting we can return to the installer directory where we built t
 $ pwd
 ~/installer
 
-$ export KUBECONFIG=/home/bschmaus/installer/cluster-manifests/auth/kubeconfig
+$ export KUBECONFIG=/home/bschmaus/installer/kni-22/auth/kubeconfig
 
-$ bin/openshift-install agent wait-for install-complete --dir cluster-manifests
+$ bin/openshift-install agent wait-for install-complete --dir kni-22
 INFO Waiting for cluster install to initialize. Sleeping for 30 seconds 
 INFO Waiting for cluster install to initialize. Sleeping for 30 seconds 
 INFO Waiting for cluster install to initialize. Sleeping for 30 seconds 
@@ -534,7 +534,7 @@ INFO cluster bootstrap is complete
 INFO Cluster is installed                         
 INFO Install complete!                            
 INFO To access the cluster as the system:admin user when using 'oc', run 
-INFO     export KUBECONFIG=/home/bschmaus/installer/cluster-manifests/auth/kubeconfig 
+INFO     export KUBECONFIG=/home/bschmaus/installer/kni-22/auth/kubeconfig 
 INFO Access the OpenShift web-console here: https://console-openshift-console.apps.kni22.schmaustech.com 
 ~~~
 
