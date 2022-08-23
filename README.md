@@ -563,7 +563,7 @@ storage                                    4.11.0        True        False      
 
 ## Setting KubeAdmin Password
 
-Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure which will generate a password, set it in kube-system and then write out the password in auth/kubeadmin/password all in one line: 
+Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure which will generate a password, set it in kube-system and then write out the password in auth/kubeadmin-password all in one line: 
 
 ~~~bash
 $ oc patch secret -n kube-system kubeadmin --type json -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'"$(openssl rand -base64 18 | tee auth/kubeadmin-password | htpasswd -nBi -C 10 "" | cut -d: -f2 | base64 -w 0 -)"'"}]'
