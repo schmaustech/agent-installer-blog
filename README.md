@@ -41,21 +41,39 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 ## Obtaining the Binary
 
-Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirement will go away when the Agent-Based Installer becomes Generally Available as part of OpenShift.
-
-Before we begin lets ensure we are using RHEL8 or RHEL9 on x86 architecture as our location to build the binary and have installed the packages <code>go</code>, <code>make</code> and <code>zip</code>.  Further, we will want to ensure that <code>nmstatectl</code> 1.x and <code>oc</code> are installed on the system.  We also need about 5G of available disk space for the source code, compiled binary and generated images. Now lets go grab the OpenShift installer source code from Github and checkout the branch agent-installer:
+Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.  We can obtain the <code>openshift-install</code> binary which will contain the agent option by running the following commands:
 
 ~~~bash
+$ export VERSION="4.11.0"
+$ export CMD=openshift-install
+$ export EXTRACT_DIR=$(pwd)
+$ export PULLSECRET=/home/bschmaus/pull-secret.json
+$ export RELEASE_IMAGE=$(curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp/$VERSION/release.txt| grep 'Pull From: quay.io' | awk -F ' ' '{print $3}' | xargs)
+$ oc adm release extract --registry-config "${PULLSECRET}" --command=$CMD --to "${EXTRACT_DIR}" ${RELEASE_IMAGE}
+
+$ ./openshift-install version
+./openshift-install 4.11.0
+built from commit 37684309bcb598757c99d3ea9fbc0758343d64a5
+release image quay.io/openshift-release-dev/ocp-release@sha256:300bce8246cf880e792e106607925de0a404484637627edf5f517375517d54a4
+release architecture amd64
+~~~
+
+We should also ensure that <code>nmstate</code> is installed on the system we are running the <code>openshift-install</code> command from:
 
 ~~~
+$ sudo rpm -qa|grep ^nmstate
+nmstate-1.2.1-3.el8_6.x86_64
+~~~
+
+If <code>nmstate</code> is not installed please use <code>dnf -y install nmstate</code> to install the required package.
 
 ## Creating the Install-config.yaml and Agent-config.yaml
 
-Now that we have the binary ready at <code>installer/bin/openshift-install</code> lets go ahead and create a directory that will contain the required manifests we need for our deployment that will get injected into the ISO we build:
+Now that we have the binary ready at <code>~/openshift-install</code> lets go ahead and create a directory that will contain the required manifests we need for our deployment that will get injected into the ISO we build:
 
 ~~~bash
 $ pwd
-~/installer
+/home/bschmaus/
 
 $ mkdir kni-22
 ~~~
