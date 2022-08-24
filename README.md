@@ -364,7 +364,7 @@ export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE="quay.io/openshift-release-dev/o
 We are now ready to use the Openshift install binary we compiled earlier with the Agent Installer code to generate our ephemeral OpenShift ISO.   We do this by issuing the following command which introduces the agent option.  This in turn will read in the manifest details we generated and download the corresponding RHCOS image and then inject our details into the image writing out a file called agent.iso:
 
 ~~~bash
-$ bin/openshift-install agent create image --log-level debug --dir kni-22
+$ bin/openshift-install agent create image --dir kni-22
 WARNING Found override for release image. Please be warned, this is not advised 
 WARNING Found override for release image. Please be warned, this is not advised 
 INFO[0000] Start configuring static network for 3 hosts  pkg=manifests
