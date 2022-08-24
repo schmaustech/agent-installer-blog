@@ -35,7 +35,7 @@ Throughout the rest of this blog we will be demonstrating how to use the Agent-B
 
 ## Getting Familiar with Agent-Based OpenShift Installer
 
-Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike the bare metal IPI OpenShift installation there is no need for a provisioning host.  This is because one of the nodes becomes the bootstrap host early in the boot process and runs the assisted service.  The assisted service validates and confirms all hosts checking in meet the requirements and triggers a cluster deployment.   Once the cluster deployment kicks off all the nodes get their RHCOS image written to disk but only the non-bootstrap nodes reboot and begin to instantiate a cluster.  Once they come up then the original bootstrap node reboots and comes up from disk to join the cluster.  At that point the bootstrapping is complete and the cluster comes up just like any other installation method until finalized.
+Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike the bare metal IPI OpenShift installation there is no need for a provisioning host.  This is because one of the nodes runs the assisted service early in the boot process and eventually becomes the bootstrap host.  The assisted service validates and confirms all hosts checking in meet the requirements and triggers a cluster deployment.   Once the cluster deployment kicks off all the nodes get their RHCOS image written to disk but only the non-bootstrap nodes reboot and begin to instantiate a cluster.  Once they come up then the original bootstrap node reboots and comes up from disk to join the cluster.  At that point the bootstrapping is complete and the cluster comes up just like any other installation method until finalized.
 
 <img src="node-lifecycle.png" style="width: 1000px;" border=0/>
 
@@ -43,7 +43,7 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirement will go away when the Agent-Based Installer becomes Generally Available as part of OpenShift.
 
-Before we begin lets ensure we are using RHEL8 or RHEL9 on x86 architecture as our location to build the binary and have installed the packages <code>go</code>, <code>make</code> and <code>zip</code>.  Further, we will want to ensure that <code>mkisofs</code> and <code>nmstatectl</code> are installed on the system.  We also need about 5G of available disk space for the source code, compiled binary and generated images. Now lets go grab the OpenShift installer source code from Github and checkout the specific tag agent-based-installer-4.11-developer-preview:
+Before we begin lets ensure we are using RHEL8 or RHEL9 on x86 architecture as our location to build the binary and have installed the packages <code>go</code>, <code>make</code> and <code>zip</code>.  Further, we will want to ensure that <code>nmstatectl</code> 1.x and <code>oc</code> are installed on the system.  We also need about 5G of available disk space for the source code, compiled binary and generated images. Now lets go grab the OpenShift installer source code from Github and checkout the branch agent-installer:
 
 ~~~bash
 $ git clone https://github.com/openshift/installer
@@ -57,29 +57,7 @@ Resolving deltas: 100% (139159/139159), done.
 Updating files: 100% (83711/83711), done.
 
 $ cd installer/
-$ git checkout agent-based-installer-4.11-developer-preview
-Note: switching to 'agent-based-installer-4.11-developer-preview'.
-
-You are in 'detached HEAD' state. You can look around, make experimental
-changes and commit them, and you can discard any commits you make in this
-state without impacting any branches by switching back to a branch.
-
-If you want to create a new branch to retain commits you create, you may
-do so (now or later) by using -c with the switch command. Example:
-
-  git switch -c <new-branch-name>
-
-Or undo this operation with:
-
-  git switch -
-
-Turn off this advice by setting config variable advice.detachedHead to false
-
-HEAD is now at 06703b2ad Merge pull request #6201 from rwsu/BUG-2114977
-
-$ git branch
-* (HEAD detached at 06703b2ad)
-  master
+$ git checkout agent-installer
 ~~~
 
 Once we have the source code checked out we need to go ahead and build the the OpenShift install binary:
@@ -176,13 +154,13 @@ Now that we have the binary ready at <code>installer/bin/openshift-install</code
 $ pwd
 ~/installer
 
-$ mkdir cluster-manifests
+$ mkdir kni-22
 ~~~
 
-This creates the directory <code>installer/cluster-manifests</code>. With the directory created we can move onto creating the install configuration resource file.  This file specifies the clusters configuration such as number of control plane and/or worker nodes, the API and ingress VIP, physical node MAC addresses and the cluster networking. In my example I will be deploying a 3 node compact cluster which references a cluster deployment named kni22.   We will also define the image content source policy and include our cert for our registry since we are doing a disconnected installation.
+This creates the directory <code>installer/kni-22</code>. With the directory created we can move onto creating the install configuration resource file.  This file specifies the cluster's configuration such as number of control plane and/or worker nodes, the API and ingress VIP, physical node MAC addresses and the cluster networking. In my example I will be deploying a 3 node compact cluster named kni22.   We will also define the image content source policy and include our cert for our registry since we are doing a disconnected installation.
 
 ~~~bash
-$ cat << EOF > ./cluster-manifests/install-config.yaml
+$ cat << EOF > ./kni-22/install-config.yaml
 apiVersion: v1
 baseDomain: schmaustech.com
 compute:
@@ -268,10 +246,10 @@ additionalTrustBundle: |
 EOF
 ~~~
 
-The next configuration file we need to create is the agent configuration resource file.   This file will contain the details of the actual hosts in relation to their networking configuration.   Looking close we can see that for each host we define the interfac, mac address, ipaddress if static and a DNS resolver and routes.   The configuration is very similar to a NMState configuration.  However one item that is a bit different is the rendezvousIP address.   This is the ipaddress of the host that will become the temporary bootstrap node while the cluster is installing.  This ipaddress shoule match one of the other nodes whether they are using a static ipaddress or a dhcp reservation ipaddress:
+The next configuration file we need to create is the agent configuration resource file.   This file will contain the details of the actual hosts in relation to their networking configuration.   Looking close we can see that for each host we define the interface, mac address, ipaddress if static and a DNS resolver and routes, using the NMState configuration format.  The rendezvousIP is the IP address of the host that will become the temporary bootstrap node while the cluster is installing.  This IP address should match one of the nodes, whether they are using a static IP address or a DHCP reservation IP address:
 
 ~~~bash
-$ cat << EOF > ./cluster-manifests/agent-config.yaml
+$ cat << EOF > ./kni-22/agent-config.yaml
 apiVersion: v1alpha1
 metadata:
   name: kni22
@@ -358,10 +336,10 @@ hosts:
 EOF
 ~~~
 
-At this point we have now created two configuration files: the install-config.yaml and the agent-config.yaml.  Both of which are under the cluster-manifests directory:
+At this point we have now created two configuration files: the install-config.yaml and the agent-config.yaml.  Both of which are under the kni-22 directory:
 
 ~~~bash
-$ ls -1 cluster-manifests/
+$ ls -1 kni-22/
 agent-config.yaml
 install-config.yaml
 ~~~
@@ -386,7 +364,7 @@ export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE="quay.io/openshift-release-dev/o
 We are now ready to use the Openshift install binary we compiled earlier with the Agent Installer code to generate our ephemeral OpenShift ISO.   We do this by issuing the following command which introduces the agent option.  This in turn will read in the manifest details we generated and download the corresponding RHCOS image and then inject our details into the image writing out a file called agent.iso:
 
 ~~~bash
-$ bin/openshift-install agent create image --log-level debug --dir cluster-manifests
+$ bin/openshift-install agent create image --dir kni-22
 WARNING Found override for release image. Please be warned, this is not advised 
 WARNING Found override for release image. Please be warned, this is not advised 
 INFO[0000] Start configuring static network for 3 hosts  pkg=manifests
@@ -402,10 +380,10 @@ INFO Consuming Agent Config from target directory
 Once the agent create image command completes we are left with a agent.iso image and an auth directory that containers kubeconfig:
 
 ~~~bash
-$ ls -1 cluster-manifests/
+$ ls -1 kni-22/
 agent.iso
 auth
-$ ls -1 cluster-manifests/auth/
+$ ls -1 kni-22/auth/
 kubeconfig
 ~~~
 
@@ -414,7 +392,7 @@ kubeconfig
 Since the nodes I will be using to demonstrate this 3 node compact cluster are virtual machines all on the same KVM hypervisor I will go ahead and copy the agent.iso image over to that host:
 
 ~~~bash
-$ scp ./cluster-manifests/agent.iso root@192.168.0.22:/var/lib/libvirt/images/
+$ scp ./kni-22/agent.iso root@192.168.0.22:/var/lib/libvirt/images/
 root@192.168.0.22's password: 
 agent.iso 
 ~~~
@@ -476,9 +454,9 @@ With the nodes booting we can return to the installer directory where we built t
 $ pwd
 ~/installer
 
-$ export KUBECONFIG=/home/bschmaus/installer/cluster-manifests/auth/kubeconfig
+$ export KUBECONFIG=/home/bschmaus/installer/kni-22/auth/kubeconfig
 
-$ bin/openshift-install agent wait-for install-complete --dir cluster-manifests
+$ bin/openshift-install agent wait-for install-complete --dir kni-22
 INFO Waiting for cluster install to initialize. Sleeping for 30 seconds 
 INFO Waiting for cluster install to initialize. Sleeping for 30 seconds 
 INFO Waiting for cluster install to initialize. Sleeping for 30 seconds 
@@ -534,7 +512,7 @@ INFO cluster bootstrap is complete
 INFO Cluster is installed                         
 INFO Install complete!                            
 INFO To access the cluster as the system:admin user when using 'oc', run 
-INFO     export KUBECONFIG=/home/bschmaus/installer/cluster-manifests/auth/kubeconfig 
+INFO     export KUBECONFIG=/home/bschmaus/installer/kni-22/auth/kubeconfig 
 INFO Access the OpenShift web-console here: https://console-openshift-console.apps.kni22.schmaustech.com 
 ~~~
 
@@ -585,7 +563,7 @@ storage                                    4.11.0        True        False      
 
 ## Setting KubeAdmin Password
 
-Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure which will generate a password, set it in kube-system and then write out the password in auth/kubeadmin/password all in one line: 
+Now one thing we noticed is that the kubeadmin password is not available from the log output.   This is because this development preview of Agent-Based Installer does not provide that yet.  However we can go ahead and reset the kubeadmin password with the following procedure which will generate a password, set it in kube-system and then write out the password in auth/kubeadmin-password all in one line: 
 
 ~~~bash
 $ oc patch secret -n kube-system kubeadmin --type json -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'"$(openssl rand -base64 18 | tee auth/kubeadmin-password | htpasswd -nBi -C 10 "" | cut -d: -f2 | base64 -w 0 -)"'"}]'
