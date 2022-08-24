@@ -39,111 +39,14 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 <img src="node-lifecycle.png" style="width: 1000px;" border=0/>
 
-## Building the Binary
+## Obtaining the Binary
 
 Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.   As of this writing the Agent-based Installer needs to be compiled from the forked installer source code.  This requirement will go away when the Agent-Based Installer becomes Generally Available as part of OpenShift.
 
 Before we begin lets ensure we are using RHEL8 or RHEL9 on x86 architecture as our location to build the binary and have installed the packages <code>go</code>, <code>make</code> and <code>zip</code>.  Further, we will want to ensure that <code>nmstatectl</code> 1.x and <code>oc</code> are installed on the system.  We also need about 5G of available disk space for the source code, compiled binary and generated images. Now lets go grab the OpenShift installer source code from Github and checkout the branch agent-installer:
 
 ~~~bash
-$ git clone https://github.com/openshift/installer
-Cloning into 'installer'...
-remote: Enumerating objects: 213302, done.
-remote: Counting objects: 100% (67/67), done.
-remote: Compressing objects: 100% (55/55), done.
-remote: Total 213302 (delta 22), reused 42 (delta 8), pack-reused 213235
-Receiving objects: 100% (213302/213302), 881.35 MiB | 11.15 MiB/s, done.
-Resolving deltas: 100% (139159/139159), done.
-Updating files: 100% (83711/83711), done.
 
-$ cd installer/
-$ git checkout agent-installer
-~~~
-
-Once we have the source code checked out we need to go ahead and build the the OpenShift install binary:
-
-~~~bash
-$ hack/build.sh
-+ minimum_go_version=1.17
-++ go version
-++ cut -d ' ' -f 3
-+ current_go_version=go1.17.7
-++ version 1.17.7
-++ IFS=.
-++ printf '%03d%03d%03d\n' 1 17 7
-++ unset IFS
-++ version 1.17
-++ IFS=.
-++ printf '%03d%03d%03d\n' 1 17
-++ unset IFS
-+ '[' 001017007 -lt 001017000 ']'
-+ make -C terraform all
-make: Entering directory '/home/bschmaus/installer/terraform'
-cd providers/alicloud; \
-if [ -f main.go ]; then path="."; else path=./vendor/`grep _ tools.go|awk '{ print $2 }'|sed 's|"||g'`; fi; \
-go build -ldflags "-s -w" -o ../../bin/linux_amd64/terraform-provider-alicloud "$path"; \
-zip -1j ../../bin/linux_amd64/terraform-provider-alicloud.zip ../../bin/linux_amd64/terraform-provider-alicloud;
-  adding: terraform-provider-alicloud (deflated 81%)
-(...)
-cd terraform; \
-go build -ldflags "-s -w" -o ../bin/linux_amd64/terraform ./vendor/github.com/hashicorp/terraform
-make: Leaving directory '/home/bschmaus/installer/terraform'
-+ copy_terraform_to_mirror
-++ go env GOOS
-++ go env GOARCH
-+ TARGET_OS_ARCH=linux_amd64
-+ rm -rf '/home/bschmaus/installer/pkg/terraform/providers/mirror/*/'
-+ find /home/bschmaus/installer/terraform/bin/linux_amd64/ -maxdepth 1 -name 'terraform-provider-*.zip' -exec bash -c '
-      providerName="$(basename "$1" | cut -d - -f 3 | cut -d . -f 1)"
-      targetOSArch="$2"
-      dstDir="${PWD}/pkg/terraform/providers/mirror/openshift/local/$providerName"
-      mkdir -p "$dstDir"
-      echo "Copying $providerName provider to mirror"
-      cp "$1" "$dstDir/terraform-provider-${providerName}_1.0.0_${targetOSArch}.zip"
-    ' shell '{}' linux_amd64 ';'
-Copying alicloud provider to mirror
-Copying aws provider to mirror
-Copying azurerm provider to mirror
-Copying azurestack provider to mirror
-Copying google provider to mirror
-Copying ibm provider to mirror
-Copying ignition provider to mirror
-Copying ironic provider to mirror
-Copying libvirt provider to mirror
-Copying local provider to mirror
-Copying nutanix provider to mirror
-Copying openstack provider to mirror
-Copying ovirt provider to mirror
-Copying random provider to mirror
-Copying time provider to mirror
-Copying vsphere provider to mirror
-Copying vsphereprivate provider to mirror
-Copying azureprivatedns provider to mirror
-+ mkdir -p /home/bschmaus/installer/pkg/terraform/providers/mirror/terraform/
-+ cp /home/bschmaus/installer/terraform/bin/linux_amd64/terraform /home/bschmaus/installer/pkg/terraform/providers/mirror/terraform/
-+ MODE=release
-++ git rev-parse --verify 'HEAD^{commit}'
-+ GIT_COMMIT=06703b2ad2fb337efce4c283acdbc5be07370de9
-++ git describe --always --abbrev=40 --dirty
-+ GIT_TAG=unreleased-master-6529-g06703b2ad2fb337efce4c283acdbc5be07370de9
-+ DEFAULT_ARCH=amd64
-+ GOFLAGS=-mod=vendor
-+ LDFLAGS=' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6529-g06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.Commit=06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.defaultArch=amd64'
-+ TAGS=
-+ OUTPUT=bin/openshift-install
-+ export CGO_ENABLED=0
-+ CGO_ENABLED=0
-+ case "${MODE}" in
-+ LDFLAGS=' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6529-g06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.Commit=06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.defaultArch=amd64 -s -w'
-+ TAGS=' release'
-+ test '' '!=' y
-+ GOOS=
-+ GOARCH=
-+ go generate ./data
-writing assets_vfsdata.go
-+ echo ' release'
-+ grep -q libvirt
-+ go build -mod=vendor -ldflags ' -X github.com/openshift/installer/pkg/version.Raw=unreleased-master-6529-g06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.Commit=06703b2ad2fb337efce4c283acdbc5be07370de9 -X github.com/openshift/installer/pkg/version.defaultArch=amd64 -s -w' -tags ' release' -o bin/openshift-install ./cmd/openshift-install
 ~~~
 
 ## Creating the Install-config.yaml and Agent-config.yaml
@@ -346,21 +249,6 @@ install-config.yaml
 
 ## Building the Agent.iso Image
 
-One more step we need to execute before creating our image is to set our image release override to ensure we are deploying the version of OpenShift we want to deploy.  In my example my local disconnected registry contains the following OpenShift release 4.11.0.  So we will want to set the override to that version by executing the following:
-
-~~~bash
-export VERSION="4.11.0"
-export LOCAL_REG='provisioning.schmaustech.com:5000'
-export LOCAL_REPO='ocp4/openshift4'
-export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE=${LOCAL_REG}/${LOCAL_REPO}:${VERSION}
-~~~
-
-I should note here that if one did not have a disconnected installation then the image override should be set to the following:
-
-~~~bash
-export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE="quay.io/openshift-release-dev/ocp-release:4.11.0-x86_64"
-~~~
-
 We are now ready to use the Openshift install binary we compiled earlier with the Agent Installer code to generate our ephemeral OpenShift ISO.   We do this by issuing the following command which introduces the agent option.  This in turn will read in the manifest details we generated and download the corresponding RHCOS image and then inject our details into the image writing out a file called agent.iso:
 
 ~~~bash
@@ -374,7 +262,6 @@ INFO[0001] Adding NMConnection file <enp2s0.nmconnection>  pkg=manifests
 INFO[0001] Extracting base ISO from release payload     
 INFO Consuming Install Config from target directory 
 INFO Consuming Agent Config from target directory 
-
 ~~~
 
 Once the agent create image command completes we are left with a agent.iso image and an auth directory that containers kubeconfig:
