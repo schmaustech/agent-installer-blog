@@ -24,10 +24,11 @@ We have worked with users from different industries and incorporated their feedb
 
 ## Limitations/Notes
 
- * errors in wait-for saying can be ignored
- * At least one of node needs to have static IP configuration: networkConfig or ZTP nmstateconfig
- * Conflict when both networkConfig and nmstateconfig are provided for a node
- * SNO is not completing when external api-int/ingress DNS records are missing
+ * Errors in the console: some errors in wait-for can be safely ignored.
+ * Conflict when both networkConfig and nmstateconfig are provided for a node.
+ * [dnsmasq bug|https://bugzilla.redhat.com/show_bug.cgi?id=2120357] halts installation after booting ISO in rare circumstances for SNO clusters. SSHing to node and restarting dnsmasq allows it to continue.
+ * [Misleading error|https://issues.redhat.com/browse/OCPBUGS-527] message when lacking assets to create the installation image.
+
 
 ## Lab Demo Configuration
 
