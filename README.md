@@ -271,8 +271,6 @@ We are now ready to use the Openshift install binary we compiled earlier with th
 
 ~~~bash
 $ bin/openshift-install agent create image --dir kni-22
-WARNING Found override for release image. Please be warned, this is not advised 
-WARNING Found override for release image. Please be warned, this is not advised 
 INFO[0000] Start configuring static network for 3 hosts  pkg=manifests
 INFO[0000] Adding NMConnection file <enp2s0.nmconnection>  pkg=manifests
 INFO[0001] Adding NMConnection file <enp2s0.nmconnection>  pkg=manifests
