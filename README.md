@@ -26,7 +26,7 @@ We have worked with users from different industries and incorporated their feedb
 
  * Errors in the console: some errors in wait-for can be safely ignored.
  * Conflict when both networkConfig and nmstateconfig are provided for a node.
- * dnsmasq bug halts installation after booting ISO in rare circumstances for SNO clusters. SSHing to node and restarting dnsmasq allows it to continue [BZ#2120357](https://bugzilla.redhat.com/show_bug.cgi?id=2120357)
+ * dnsmasq bug halts installation after booting ISO in rare circumstances for SNO clusters. SSHing to node and restarting dnsmasq allows it to continue [BZ#2120357]((https://bugzilla.redhat.com/show_bug.cgi?id=2120357)).
  * Misleading error message when lacking assets to create the installation image ([OCPBUGS-527](https://issues.redhat.com/browse/OCPBUGS-527)).
  * When using static IP and bond interfaces hostnames aren’t set ([BZ#2118817](https://bugzilla.redhat.com/show_bug.cgi?id=2118817)).
 
