@@ -43,10 +43,16 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 ## Obtaining the Binary
 
-Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.  We can obtain the <code>openshift-install</code> binary which will contain the agent option by running the following commands:
+Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.  We can obtain the <code>openshift-install</code> 4.11 dev-preview binary which will contain the agent option from the following [link](https://github.com/openshift/installer/releases/tag/agent-installer-v4.11.0-dev-preview-2).  When the links open the page will look like the following:
+
+<img src="openshift-install-dev-preview.png" style="width: 1000px;" border=0/>
+
+From there we can just click on the link to download the <code>openshift-install</code> binary and then set the execution bits on it.
+
+In the future once the agent installer code merges with the openshift-install proper one will be able to use 4.12 builds and extract the openshift-install command using the commands below:
 
 ~~~bash
-$ export VERSION="4.12.0-ec.1"
+$ export VERSION="4.12.0-ec.2"
 $ export CMD=openshift-install
 $ export EXTRACT_DIR=$(pwd)
 $ export PULLSECRET=/home/bschmaus/pull-secret.json
@@ -54,7 +60,7 @@ $ export RELEASE_IMAGE=$(curl -s https://mirror.openshift.com/pub/openshift-v4/c
 $ oc adm release extract --registry-config "${PULLSECRET}" --command=$CMD --to "${EXTRACT_DIR}" ${RELEASE_IMAGE}
 
 $ $ ./openshift-install version
-./openshift-install 4.12.0-ec.1
+./openshift-install 4.12.0-ec.2
 built from commit 3f27a2e7bedf151101feaa6f4df92b7e052fcd48
 release image quay.io/openshift-release-dev/ocp-release@sha256:c7997bb9f6a971b38c430f24ac960834a2988442a3bfb2d5e7e1e6b0aa23676f
 release architecture amd64
