@@ -66,7 +66,7 @@ release image quay.io/openshift-release-dev/ocp-release@sha256:c7997bb9f6a971b38
 release architecture amd64
 ~~~
 
-We should also ensure that <code>nmstate</code> is installed on the system we are running the <code>openshift-install</code> command from:
+Before we start to use the binary we should also ensure that <code>nmstate</code> is installed on the system we are running the <code>openshift-install</code> command from:
 
 ~~~
 $ sudo rpm -qa|grep ^nmstate
