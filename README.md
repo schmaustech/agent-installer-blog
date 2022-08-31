@@ -45,7 +45,7 @@ Let us familiarize ourselves with the Agent-Based Installer workflow.   Unlike t
 
 Now that we understand how the Agent-Based Installer works and what use cases its trying to solve lets focus on actually using it.  We can obtain the <code>openshift-install</code> 4.11 dev-preview binary which will contain the agent option from the following [link](https://github.com/openshift/installer/releases/tag/agent-installer-v4.11.0-dev-preview-2).  When the links open the page will look like the following:
 
-<img src="openshift-install-devpreview.png" style="width: 1000px;" border=0/>
+<img src="openshift-install-dev-preview.png" style="width: 1000px;" border=0/>
 
 From there we can just click on the link to download the <code>openshift-install</code> binary and then set the execution bits on it.
 
