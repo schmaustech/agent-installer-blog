@@ -489,6 +489,8 @@ VdCOu3+DVfE3J2jurERXFxf1
 
 And now we should be able to login to the OpenShift Console with our newly reset kubeadmin password.
 
-## Final Thoughts 
+## Final Thoughts and Stay in Touch
 
 Hopefully this blog provides an early glimpse into the the ease of installation of disconnected clusters on bare metal when using the new Agent-Based Installer.  In future releases when it goes GA we plan to provide additional improvements and enhancements, such as a graphical user interface.
+
+Please, comment or send us feedback either through your usual Red Hat contacts or logging an issue on the [OpenShift installer on Github](https://github.com/openshift/installer/issues).
