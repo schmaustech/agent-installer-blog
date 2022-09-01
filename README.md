@@ -49,7 +49,7 @@ Now that we understand how the Agent-Based Installer works and what use cases it
 
 From there we can just click on the link to download the <code>openshift-install</code> binary and then set the execution bits on it.
 
-In the future once the agent installer code merges with the openshift-install proper one will be able to use 4.12 builds and extract the openshift-install command using the commands below:
+In the future, once the agent installer code merges with the openshift-install master branch, we will be able to use [4.12 developer preview builds](https://amd64.ocp.releases.ci.openshift.org/#4-dev-preview) and extract the openshift-install command using the commands below:
 
 ~~~bash
 $ export VERSION="4.12.0-ec.2"
