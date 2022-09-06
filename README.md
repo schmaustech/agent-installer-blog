@@ -59,7 +59,7 @@ $ export PULLSECRET=/home/bschmaus/pull-secret.json
 $ export RELEASE_IMAGE=$(curl -s https://mirror.openshift.com/pub/openshift-v4/clients/ocp/$VERSION/release.txt| grep 'Pull From: quay.io' | awk -F ' ' '{print $3}' | xargs)
 $ oc adm release extract --registry-config "${PULLSECRET}" --command=$CMD --to "${EXTRACT_DIR}" ${RELEASE_IMAGE}
 
-$ $ ./openshift-install version
+$ ./openshift-install version
 ./openshift-install 4.12.0-ec.2
 built from commit 3f27a2e7bedf151101feaa6f4df92b7e052fcd48
 release image quay.io/openshift-release-dev/ocp-release@sha256:c7997bb9f6a971b38c430f24ac960834a2988442a3bfb2d5e7e1e6b0aa23676f
@@ -81,7 +81,7 @@ Now that we have the binary ready at <code>~/openshift-install</code> lets go ah
 
 ~~~bash
 $ pwd
-/home/bschmaus/
+/home/bschmaus/installer
 
 $ mkdir kni-22
 ~~~
